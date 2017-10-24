@@ -1,0 +1,237 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts, amsmath, amssymb, amstext, latexsym}
+\usepackage{graphicx, epsfig}
+\usepackage[latin1]{inputenc}
+\usepackage[french]{babel}
+\usepackage{exscale}
+\usepackage{amsbsy}
+\usepackage{amsopn}
+\usepackage{fancyhdr}
+\usepackage{listings}
+
+\newcommand{\noi}{\noindent}
+\newcommand{\dsp}{\displaystyle}
+\newcommand{\ind}{{{\large 1} \hspace*{-1.6mm} {\large 1}}}
+
+
+\textheight 25cm
+\textwidth 16cm
+\oddsidemargin 0cm
+\evensidemargin 0cm
+\topmargin 0cm
+\hoffset -0mm
+\voffset -20mm
+
+\title{TP OpenStreetMap - SIG}
+\author{CARRE Ludovic \and DELOCHE Maxime \and LEFOULON Vincent}
+
+\begin{document}
+
+\maketitle
+
+\section*{Question 1}
+
+\begin{lstlisting}[language=SQL]
+SELECT COUNT(*)
+FROM users;
+\end{lstlisting}
+
+\begin{lstlisting}
+count 
+-------
+  4576
+  (1 row)
+\end{lstlisting}
+
+\newpage
+
+\section*{Question 2.a}
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_X(geom), ST_Y(geom), ST_Z(geom)
+FROM nodes WHERE id = 1787038609;
+\end{lstlisting}
+
+\begin{lstlisting}
+st_x      |   st_y    | st_z 
+----------+-----------+------
+5.7680106 | 45.192893 |     
+(1 row)
+\end{lstlisting}
+
+\section*{Question 2.b}
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM spatial_ref_sys
+WHERE srid = (
+    SELECT ST_SRID(geom) FROM nodes WHERE id = 1787038609
+);
+\end{lstlisting}
+
+Le système de coordonnées utilisé est WGS84, c'est-à-dire le système GPS.
+
+\newpage
+
+\section*{Question 3}
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_AsEWKT(ST_Centroid(linestring))
+FROM ways
+WHERE tags->'amenity' = 'townhall' AND tags->'name' like '%Grenoble%';
+\end{lstlisting}
+
+\begin{lstlisting}
+st_asewkt                      
+----------------------------------------------------
+ SRID=4326;POINT(5.73643908557793 45.1864548121024)
+ (1 row)
+\end{lstlisting}
+
+\newpage
+
+\section*{Question 4}
+
+\begin{lstlisting}[language=SQL]
+SELECT tags->'highway', COUNT(id)
+FROM ways
+WHERE tags ? 'highway'
+GROUP BY tags->'highway'
+ORDER BY COUNT(id) DESC;
+\end{lstlisting}
+
+\begin{lstlisting}
+?column?                 | count 
+-------------------------+-------
+residential              | 94356
+unclassified             | 77678
+service                  | 64461
+track                    | 58276
+tertiary                 | 21923
+footway                  | 21742
+path                     | 21413
+secondary                | 18444
+...
+\end{lstlisting}
+
+\newpage
+
+\section*{Question 5.a}
+
+\begin{lstlisting}[language=SQL]
+SELECT tags->'highway', SUM(ST_Length(linestring))
+FROM ways
+WHERE tags ? 'highway'
+GROUP BY tags->'highway'
+ORDER BY SUM(ST_Length(linestring)) DESC;
+\end{lstlisting}
+
+\begin{lstlisting}
+?column?                 |         sum          
+-------------------------+----------------------
+unclassified             |     435.285712879273
+track                    |     343.366696791793
+residential              |     210.396982404606
+tertiary                 |     208.294200085326
+path                     |     134.367018999509
+...
+\end{lstlisting}
+
+\section*{Question 5.b}
+
+La documentation dit : \textit{Geometry: Measurements are in the units of the spatial reference system of the geometry.}
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM spatial_ref_sys
+WHERE srid = (
+    SELECT ST_SRID(linestring) FROM ways LIMIT 1
+);
+\end{lstlisting}
+
+Le système de référence est WGS84 et l'unité est le degré (\textit{degree}).
+
+\section*{Question 5.c}
+
+On travaille avec des géographies, dont l'unité est le mètre.
+
+\begin{lstlisting}[language=SQL]
+SELECT tags->'highway', SUM(ST_Length(linestring::geography))/1000
+FROM ways
+WHERE tags ? 'highway'
+GROUP BY tags->'highway'
+ORDER BY SUM(ST_Length(linestring)) DESC;
+\end{lstlisting}
+
+\newpage
+
+\section*{Question 6}
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_Area(ST_MakePolygon(linestring)::geography)
+FROM ways
+WHERE tags->'name' = 'Ensimag';
+\end{lstlisting}
+
+\begin{lstlisting}
+st_area      
+------------------
+635.243050458852
+(1 row)
+\end{lstlisting}
+
+\newpage
+
+\section*{Question 7}
+
+\begin{lstlisting}[language=SQL]
+SELECT quartier.quartier, count(ways.id)
+FROM quartier, ways
+WHERE
+    ways.tags->'amenity' = 'school' AND
+    ST_Contains(
+        quartier.the_geom,
+        ST_Transform(
+            ST_MakePolygon(
+                ST_AddPoint(
+                    ways.linestring,
+                    ST_StartPoint(ways.linestring)
+                )
+            ),
+            2154
+        )
+    )
+GROUP BY quartier.quartier
+ORDER BY count(ways.id) DESC;
+\end{lstlisting}
+
+\begin{lstlisting}
+quartier             | count 
+---------------------+-------
+BERRIAT ST BRUNO     |    13
+CENTRE VILLLE        |    12
+EXPOSITION-BAJATIERE |     9
+RONDEAU-LIBERATION   |     7
+EAUX CLAIRES         |     6
+ABBAYE-JOUHAUX       |     5
+...
+\end{lstlisting}
+
+\newpage
+
+\section*{Question 8 (TODO)}
+
+On définit le centre géographique d'une région comme la municipalité ayant une
+distance minimale avec sa municipalité la plus éloignée.
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM relations
+WHERE tags->'boundary' = 'administrative' AND tags->'admin_level' = '8';
+\end{lstlisting}
+
+Une relation contient plusieurs éléments géométriques, listés dans la table
+relation\_members.
+
+\end{document}
