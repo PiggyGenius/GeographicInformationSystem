@@ -220,10 +220,13 @@ ABBAYE-JOUHAUX       |     5
 
 \newpage
 
-\section*{Question 8 (TODO)}
+\section*{Question 8 (incomplet)}
 
 On définit le centre géographique d'une région comme la municipalité ayant une
-distance minimale avec sa municipalité la plus éloignée.
+distance minimale avec sa municipalité la plus éloignée. On définit la distance
+entre deux villes comme TODO.
+
+On commence par récupérer les municipalités :
 
 \begin{lstlisting}[language=SQL]
 SELECT *
@@ -232,6 +235,30 @@ WHERE tags->'boundary' = 'administrative' AND tags->'admin_level' = '8';
 \end{lstlisting}
 
 Une relation contient plusieurs éléments géométriques, listés dans la table
-relation\_members.
+\verb?relation_members? :
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM relations
+INNER JOIN relation_members ON relations.id = relation_members.relation_id
+WHERE tags->'boundary' = 'administrative' AND tags->'admin_level' = '8';
+\end{lstlisting}
+
+\verb?relation_members.member_type? fait référence à la table contenant les données
+géographiques :
+
+\begin{lstlisting}[language=SQL]
+SELECT DISTINCT(member_type)
+FROM relation_members;
+\end{lstlisting}
+
+\begin{lstlisting}
+member_type 
+-------------
+W
+R
+N
+(3 rows)
+\end{lstlisting}
 
 \end{document}
