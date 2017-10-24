@@ -1,5 +1,6 @@
 import geoexplorer.gui.MapPanel;
 import geoexplorer.gui.GeoMainFrame;
+import database.DataBase;
 import database.Utils;
 
 public class Main {
