@@ -50,7 +50,8 @@ count
 
 \begin{lstlisting}[language=SQL]
 SELECT ST_X(geom), ST_Y(geom), ST_Z(geom)
-FROM nodes WHERE id = 1787038609;
+FROM nodes
+WHERE id = 1787038609;
 \end{lstlisting}
 
 \begin{lstlisting}
@@ -224,7 +225,7 @@ ABBAYE-JOUHAUX       |     5
 
 On définit le centre géographique d'une région comme la municipalité ayant une
 distance minimale avec sa municipalité la plus éloignée. On définit la distance
-entre deux villes comme TODO.
+entre deux villes comme TODO
 
 On commence par récupérer les municipalités :
 
@@ -260,5 +261,21 @@ R
 N
 (3 rows)
 \end{lstlisting}
+
+Les bâtiments sont stockés dans la table \verb?ways?.
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_Centroid(ways.linestring)
+FROM relations
+JOIN relation_members ON relations.id = relation_members.relation_id
+JOIN ways ON relation_members.member_id = ways.id
+WHERE
+    relations.tags->'boundary' = 'administrative' AND
+    relations.tags->'admin_level' = '8' AND
+    relation_members.member_type = 'W';
+\end{lstlisting}
+
+\section*{Question 9 (incomplet)}
+
 
 \end{document}
