@@ -291,5 +291,15 @@ et retourne la ville ayant la plus petite :
 
 \section*{Question 9 (incomplet)}
 
+Par "endroit", on comprendra "point géographique". La requête renverra, s'il
+existe, un \verb?Point? PostGIS éloigné d'au moins 10 kilomètres de tout bâtiment.
+
+Commençons par récupérer les bâtiments :
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM ways
+WHERE tags->'building' = 'yes';
+\end{lstlisting}
 
 \end{document}
