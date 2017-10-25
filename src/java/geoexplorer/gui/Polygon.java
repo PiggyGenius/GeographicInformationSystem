@@ -75,4 +75,11 @@ public class Polygon implements GraphicalPrimitive {
     public void addPoint(Point point) {
         this.ls.addPoint(point);
     }
+
+
+	// Added by Maxime
+	@Override
+	public String toString() {
+		return this.ls.toString();
+	}
 }

@@ -1,10 +1,11 @@
 import geoexplorer.gui.MapPanel;
 import geoexplorer.gui.GeoMainFrame;
+import geoexplorer.gui.Polygon;
 import database.DataBase;
-import database.Line;
 import database.Utils;
 
 import java.util.List;
+
 
 
 public class Main {
@@ -13,16 +14,11 @@ public class Main {
 		// MapPanel panel = new MapPanel(0.0, 0.0, 500.0);
 		// GeoMainFrame frame = new GeoMainFrame("Grenoble map", panel);
 		DataBase.setConnection(Utils.getConnection());
-
-		List<Line> buildingWays = DataBase.getBuildingWays();
-		if (buildingWays == null) {
-			System.out.println("NULL");
-		}
-		for (Line l : buildingWays) {
-			System.out.println(l);
-			System.out.println("---------------");
-		}
-
+		List<Polygon> buildingWays = DataBase.getBuildingWays();
         Utils.closeConnection();
+
+		for (Polygon p : buildingWays) {
+			System.out.println(p);
+		}
     }
 }
