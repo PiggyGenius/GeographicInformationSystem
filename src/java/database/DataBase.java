@@ -26,25 +26,21 @@ public final class DataBase {
 		return DataBase.connection;
 	}
 
-	public static void setConnection(Connection connect){
+	public static void setConnection(Connection connect) {
 		connection = connect;
 	}
 
-	public static List<Polygon> getBuildingWays(){
+	public static List<Polygon> getBuildingWays() {
 		
-		// String query = "select id, ST_X((ST_DumpPoints(linestring)).geom), "
-		//    + "ST_Y((ST_DumpPoints(linestring)).geom) from ways where tags?'building' limit 10";
-
-		String query = "select ST_AsText(linestring) from ways where tags?'building' limit 10";
-
+		String query = "select linestring from ways where tags?'building' limit 10";
 		List<Polygon> buildings = new LinkedList<Polygon>();
 
         try {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(query);
-
-            while(rs.next()) {
-				buildings.add(parseLineString(rs.getString(1)));
+            while (rs.next()) {
+				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
+				buildings.add(toPolygon(((org.postgis.LineString)geom.getGeometry())));
 			}
 			return buildings;
         } catch(SQLException e){
@@ -53,15 +49,13 @@ public final class DataBase {
         }
 	}
 
-	private static Polygon parseLineString(String linestring) {
-		Polygon polygon = new Polygon(Color.green, Color.red);
-		Pattern pattern = Pattern.compile(floatRegex + " " + floatRegex);
-		Matcher matcher = pattern.matcher(linestring);
-		String[] point;
-		while (matcher.find()) {
-			point = matcher.group().trim().split(" ");
-			polygon.addPoint(new Point(Float.parseFloat(point[0]), 
-									   Float.parseFloat(point[1])));
+
+
+
+	private static Polygon toPolygon(org.postgis.LineString linestring) {
+		Polygon polygon = new Polygon();
+		for (org.postgis.Point p : linestring.getPoints()) {
+			polygon.addPoint(new Point(p.getX(), p.getY()));
 		}
 		return polygon;
 	}
