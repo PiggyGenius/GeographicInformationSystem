@@ -76,4 +76,14 @@ public class LineString implements GraphicalPrimitive, Iterable<Point> {
         }
         return b;
     }
+
+	// Added by Maxime
+	@Override
+	public String toString() {
+		String res = "";
+		for (Point p : this.points) {
+			res += "(" + p.getX() + "," + p.getY() + ")\n";
+		}
+		return res;
+	}
 }

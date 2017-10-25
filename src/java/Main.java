@@ -11,15 +11,18 @@ import java.util.List;
 import java.util.LinkedList;
 
 
+
 public class Main {
 
 	public static final void main(String[] args){
 		double x = 0.0;
 		double y = 0.0;
-		double mapWidth = 500.0;
+		double mapWidth = 1.0;
 		MapPanel panel = new MapPanel(x, y, mapWidth);
 		GeoMainFrame frame = new GeoMainFrame("Grenoble map", panel);
 		DataBase.setConnection(Utils.getConnection());
+		List<Polygon> buildingWays = DataBase.getBuildingWays();
+        Utils.closeConnection();
 
 		/* Create a few polygons */
 		List<Polygon> buildings = new LinkedList<>();
@@ -37,18 +40,12 @@ public class Main {
 		/* Draw polygons */
 		CoordinateConverter converter = new CoordinateConverter(frame.getWidth(), frame.getHeight(), x, y, mapWidth);
 		BuildingDrawer buildingDrawer = new BuildingDrawer(frame, converter);
-		buildingDrawer.draw(buildings);
+		buildingDrawer.draw(buildingWays);
+		//buildingDrawer.draw(buildings);
 		/* Draw polygons */
 
-		//List<Line> buildingWays = DataBase.getBuildingWays();
-		//if (buildingWays == null) {
-		//System.out.println("NULL");
-		//}
-		//for (Line l : buildingWays) {
-		//System.out.println(l);
-		//System.out.println("---------------");
-		//}
-
-		Utils.closeConnection();
-	}
+		for (Polygon p : buildingWays) {
+			System.out.println(p);
+		}
+    }
 }
