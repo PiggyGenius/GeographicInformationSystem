@@ -13,6 +13,7 @@ import java.awt.Color;
 
 import geoexplorer.gui.Polygon;
 import geoexplorer.gui.Point;
+import geoexplorer.gui.LineString;
 
 public final class DataBase {
 
@@ -31,34 +32,52 @@ public final class DataBase {
 	}
 
 	public static List<Polygon> getBuildingWays() {
-		
+		List<Polygon> buildings = new LinkedList<Polygon>();
+		ResultSet rs = getWays("building");
+		try {
+			while (rs.next()) {
+				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
+				buildings.add(toPolygon(((org.postgis.LineString)geom.getGeometry())));
+			}
+			return buildings;
+		} catch(SQLException e){
+			System.err.println("Error: " + e.getMessage());
+			return null;
+		}
+	}
+
+	public static List<LineString> getRoadWays() {
+		List<LineString> roads = new LinkedList<LineString>();
+		ResultSet rs = getWays("road");
+		try {
+			while (rs.next()) {
+				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
+				roads.add(toLineString(((org.postgis.LineString)geom.getGeometry())));
+			}
+			return roads;
+		} catch(SQLException e){
+			System.err.println("Error: " + e.getMessage());
+			return null;
+		}
+	}
+
+	private static ResultSet getWays(String tag){
 		String query = "SELECT linestring FROM ways "
-			+ "WHERE tags?'building'"
+			+ "WHERE tags?'" + tag + "' "
 			+ "AND ST_XMin(bbox) > 5.7 "
 			+ "AND ST_XMax(bbox) < 5.8 "
 			+ "AND ST_YMin(bbox) > 45.1 "
 			+ "AND ST_YMax(bbox) < 45.2 "
 			+ "LIMIT 100"
 			;
-		List<Polygon> buildings = new LinkedList<Polygon>();
-
         try {
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery(query);
-            while (rs.next()) {
-				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
-				buildings.add(toPolygon(((org.postgis.LineString)geom.getGeometry())));
-			}
-			return buildings;
+            return statement.executeQuery(query);
         } catch(SQLException e){
             System.err.println("Error: " + e.getMessage());
 			return null;
-        }
+		}
 	}
-
-
-
-
 
 	private static Polygon toPolygon(org.postgis.LineString linestring) {
 		Polygon polygon = new Polygon();
@@ -66,5 +85,13 @@ public final class DataBase {
 			polygon.addPoint(new Point(p.getX(), p.getY()));
 		}
 		return polygon;
+	}
+
+	private static LineString toLineString(org.postgis.LineString linestring) {
+		LineString line = new LineString();
+		for (org.postgis.Point p : linestring.getPoints()) {
+			line.addPoint(new Point(p.getX(), p.getY()));
+		}
+		return line;
 	}
 }

@@ -4,8 +4,9 @@ import geoexplorer.gui.MapPanel;
 import geoexplorer.gui.GeoMainFrame;
 import geoexplorer.gui.Point;
 import geoexplorer.gui.Polygon;
+import geoexplorer.gui.LineString;
 import geoexplorer.gui.CoordinateConverter;
-import controller.BuildingDrawer;
+import controller.Drawer;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -20,6 +21,7 @@ public class Main {
 		double mapWidth = 500.0;
 		DataBase.setConnection(Utils.getConnection());
 		List<Polygon> buildingWays = DataBase.getBuildingWays();
+		List<LineString> roads = DataBase.getRoadWays();
         Utils.closeConnection();
 		MapPanel map = new MapPanel(x, y, mapWidth);
 		GeoMainFrame frame = new GeoMainFrame("Grenoble map", map);
@@ -39,8 +41,9 @@ public class Main {
 
 		/* Draw polygons */
 		CoordinateConverter converter = new CoordinateConverter(frame.getWidth(), frame.getHeight(), x, y, mapWidth);
-		BuildingDrawer buildingDrawer = new BuildingDrawer(map, converter);
-		buildingDrawer.draw(buildingWays);
+		Drawer drawer = new Drawer(map, converter);
+		//drawer.drawBuildings(buildingWays);
+		drawer.drawRoads(roads);
 		//buildingDrawer.draw(buildings);
 		/* Draw polygons */
     }
