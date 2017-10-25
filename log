@@ -1,9 +1,0 @@
-2_a) select ST_X(geom), ST_Y(geom) from nodes where id=1787038609;
-2_b) select * from spatial_ref_sys where srid=(select ST_SRID(geom) from nodes where id=1787038609);
-3) select ST_X(ST_Centroid(linestring)), ST_Y(ST_Centroid(linestring)) from ways where tags->'amenity' = 'townhall' and tags->'name' like '%Grenoble%';
-4) select tags->'highway', count(id) from ways where tags?'highway' group by tags->'highway' order by count(id) desc;
-5_a) select tags->'highway', count(id), SUM(ST_Length(linestring)) from ways where tags?'highway' group by tags->'highway' order by SUM(ST_Length(linestring)) desc;
-5_b) select * from spatial_ref_sys where srid = 4326;
-5_c) ??
-6) ??
-7) ST_MakePolygon
