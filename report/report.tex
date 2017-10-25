@@ -169,10 +169,16 @@ ORDER BY SUM(ST_Length(linestring)) DESC;
 
 \section*{Question 6}
 
+On récupère tous les bâtiments de l'Ensimag depuis la table \verb?relation_members?.
+
 \begin{lstlisting}[language=SQL]
-SELECT ST_Area(ST_MakePolygon(linestring)::geography)
-FROM ways
-WHERE tags->'name' = 'Ensimag';
+SELECT SUM(ST_Area(ST_MakePolygon(ways.linestring)::geography))
+FROM relations
+JOIN relation_members ON relations.id = relation_members.relation_id
+JOIN ways ON relation_members.member_id = ways.id
+WHERE
+    relations.tags->'name' = 'Ensimag' AND
+    relation_members.member_type = 'W';
 \end{lstlisting}
 
 \begin{lstlisting}
