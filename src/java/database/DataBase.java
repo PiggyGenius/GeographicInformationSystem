@@ -38,7 +38,6 @@ public final class DataBase {
 			+ "AND ST_XMax(bbox) < 5.8 "
 			+ "AND ST_YMin(bbox) > 45.1 "
 			+ "AND ST_YMax(bbox) < 45.2 "
-			+ "LIMIT 10"
 			;
 		List<Polygon> buildings = new LinkedList<Polygon>();
 
