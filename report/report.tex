@@ -182,15 +182,35 @@ WHERE
 \end{lstlisting}
 
 \begin{lstlisting}
-st_area      
+       sum
 ------------------
-635.243050458852
-(1 row)
+ 2640.86233445186
+(1 ligne)
 \end{lstlisting}
 
 \newpage
 
 \section*{Question 7}
+
+On considère qu'une école est contenue dans un quartier si sa zone géographique (\textit{linestring})
+est incluse dans celle du quartier. On commence par déterminer le système
+géographique utilisé par la table \verb?quartier? :
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_SRID(the_geom)
+FROM quartier
+LIMIT 1;
+\end{lstlisting}
+
+\begin{lstlisting}[language=SQL]
+st_srid
+---------
+ 2154
+(1 ligne)
+\end{lstlisting}
+
+Puis on convertit les écoles en polygônes et les transforme dans le bon
+système géographique avant de vérifier la relation d'inclusion avec les quartiers :
 
 \begin{lstlisting}[language=SQL]
 SELECT quartier.quartier, count(ways.id)
@@ -268,7 +288,7 @@ N
 (3 rows)
 \end{lstlisting}
 
-Les bâtiments sont stockés dans la table \verb?ways?. On calcule le centroïd
+Les bâtiments d'une ville sont stockés dans la table \verb?ways?. On calcule le centroïd
 de chaque municipalité :
 
 \begin{lstlisting}[language=SQL]
@@ -283,11 +303,16 @@ WHERE
 GROUP BY relations.id;
 \end{lstlisting}
 
+TODO : ce que contient la table ways pour les municipalités est étrange. Notamment,
+il n'y a aucune ligne avec building=yes.
+
 Puis, pour chaque ville, on calcule sa distance aux autres, prend celle maximale
 et retourne la ville ayant la plus petite :
 
 \begin{lstlisting}[language=SQL]
 \end{lstlisting}
+
+\newpage
 
 \section*{Question 9 (incomplet)}
 
@@ -301,5 +326,11 @@ SELECT *
 FROM ways
 WHERE tags->'building' = 'yes';
 \end{lstlisting}
+
+\newpage
+
+\section*{Documentation du code Java}
+
+une documentation concernant votre application Java, contenant entre autres un descriptif rapide des fonctionnalités, de l'architecture, des requêtes effectuées, des choix de conception, et des tests effectués (et leur résultat). Cette documentation doit être concise et précise (inutile de faire 42 pages de documentation ; vous n'aurez pas le temps de toute façon).
 
 \end{document}
