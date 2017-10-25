@@ -48,7 +48,7 @@ public final class DataBase {
 
 	public static List<LineString> getRoadWays() {
 		List<LineString> roads = new LinkedList<LineString>();
-		ResultSet rs = getWays("road");
+		ResultSet rs = getWays("highway");
 		try {
 			while (rs.next()) {
 				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
@@ -68,7 +68,7 @@ public final class DataBase {
 			+ "AND ST_XMax(bbox) < 5.8 "
 			+ "AND ST_YMin(bbox) > 45.1 "
 			+ "AND ST_YMax(bbox) < 45.2 "
-			+ "LIMIT 100"
+			//+ "LIMIT 1000"
 			;
         try {
             Statement statement = connection.createStatement();

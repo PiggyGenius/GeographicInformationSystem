@@ -44,7 +44,7 @@ public class Main {
 		Drawer drawer = new Drawer(map, converter);
 		//drawer.drawBuildings(buildingWays);
 		drawer.drawRoads(roads);
-		//buildingDrawer.draw(buildings);
+		drawer.drawBuildings(buildingWays);
 		/* Draw polygons */
     }
 }
