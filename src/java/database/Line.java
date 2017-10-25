@@ -31,5 +31,19 @@ public class Line {
 		public float getLat() {
 			return this.lat;
 		}
+
+		@Override
+		public String toString() {
+			return "(" + this.lon + "," + this.lat + ")";
+		}
+	}
+
+	@Override
+	public String toString() {
+		String res = "";
+		for (Node n : this.nodeList) {
+			res += n.toString() + "\n";
+		}
+		return res;
 	}
 }

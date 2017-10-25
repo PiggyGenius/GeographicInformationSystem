@@ -1,5 +1,5 @@
 COMP_CLASSPATH = "lib/*:src/java"
-RUN_CLASSPATH = "bin"
+RUN_CLASSPATH = "bin:lib/*"
 
 all: Main
 
