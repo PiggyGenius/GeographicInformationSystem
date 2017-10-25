@@ -32,7 +32,14 @@ public final class DataBase {
 
 	public static List<Polygon> getBuildingWays() {
 		
-		String query = "select linestring from ways where tags?'building' limit 10";
+		String query = "SELECT linestring FROM ways "
+			+ "WHERE tags?'building'"
+			+ "AND ST_XMin(bbox) > 5.7 "
+			+ "AND ST_XMax(bbox) < 5.8 "
+			+ "AND ST_YMin(bbox) > 45.1 "
+			+ "AND ST_YMax(bbox) < 45.2 "
+			+ "LIMIT 10"
+			;
 		List<Polygon> buildings = new LinkedList<Polygon>();
 
         try {
@@ -48,6 +55,7 @@ public final class DataBase {
 			return null;
         }
 	}
+
 
 
 
