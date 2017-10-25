@@ -231,7 +231,7 @@ ABBAYE-JOUHAUX       |     5
 
 On définit le centre géographique d'une région comme la municipalité ayant une
 distance minimale avec sa municipalité la plus éloignée. On définit la distance
-entre deux villes comme TODO
+entre deux villes comme celle entre les centroïdes des centroïdes de leurs bâtiments.
 
 On commence par récupérer les municipalités :
 
@@ -268,17 +268,25 @@ N
 (3 rows)
 \end{lstlisting}
 
-Les bâtiments sont stockés dans la table \verb?ways?.
+Les bâtiments sont stockés dans la table \verb?ways?. On calcule le centroïd
+de chaque municipalité :
 
 \begin{lstlisting}[language=SQL]
-SELECT ST_Centroid(ways.linestring)
+SELECT relations.id, ST_Centroid(ST_Union(ways.linestring))
 FROM relations
 JOIN relation_members ON relations.id = relation_members.relation_id
 JOIN ways ON relation_members.member_id = ways.id
 WHERE
     relations.tags->'boundary' = 'administrative' AND
     relations.tags->'admin_level' = '8' AND
-    relation_members.member_type = 'W';
+    relation_members.member_type = 'W'
+GROUP BY relations.id;
+\end{lstlisting}
+
+Puis, pour chaque ville, on calcule sa distance aux autres, prend celle maximale
+et retourne la ville ayant la plus petite :
+
+\begin{lstlisting}[language=SQL]
 \end{lstlisting}
 
 \section*{Question 9 (incomplet)}
