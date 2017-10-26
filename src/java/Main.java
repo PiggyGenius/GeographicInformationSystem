@@ -22,6 +22,7 @@ public class Main {
 		DataBase.setConnection(Utils.getConnection());
 		List<Polygon> buildingWays = DataBase.getBuildingWays();
 		List<LineString> roads = DataBase.getRoadWays();
+		List<Polygon> noisePollution = DataBase.getNoisePollutedZones();
         Utils.closeConnection();
 		MapPanel map = new MapPanel(x, y, mapWidth);
 		GeoMainFrame frame = new GeoMainFrame("Grenoble map", map);
@@ -42,9 +43,11 @@ public class Main {
 		/* Draw polygons */
 		CoordinateConverter converter = new CoordinateConverter(frame.getWidth(), frame.getHeight(), x, y, mapWidth);
 		Drawer drawer = new Drawer(map, converter);
-		//drawer.drawBuildings(buildingWays);
-		drawer.drawRoads(roads);
 		drawer.drawBuildings(buildingWays);
+		drawer.drawRoads(roads);
+		System.out.println("Size = " + noisePollution.size());
+		drawer.drawBuildings(noisePollution);
+
 		/* Draw polygons */
     }
 }
