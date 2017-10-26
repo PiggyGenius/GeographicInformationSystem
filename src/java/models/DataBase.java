@@ -108,7 +108,7 @@ public final class DataBase {
 	}
 
 	/** Answer to question 13 */
-	public static List<LineString> getCityBoundaries() {
+	public static List<LineString> getBoundaries() {
 		List<LineString> boundaries = new LinkedList<LineString>();
 		String query = "SELECT ST_Transform(linestring, 2154) FROM ways "
 			+ "WHERE " + GrenobleSQL + "AND "
