@@ -329,8 +329,33 @@ WHERE tags->'building' = 'yes';
 
 \newpage
 
-\section*{Documentation du code Java}
+\section*{Documentation de l'implémentation Java}
 
 une documentation concernant votre application Java, contenant entre autres un descriptif rapide des fonctionnalités, de l'architecture, des requêtes effectuées, des choix de conception, et des tests effectués (et leur résultat). Cette documentation doit être concise et précise (inutile de faire 42 pages de documentation ; vous n'aurez pas le temps de toute façon).
+
+\subsection*{Usage}
+
+La commande \verb?make? permet de compiler le projet. \verb?make run? l'exécute.
+
+TODO : fonctionnalités implémentées
+
+\subsection*{Architecture du code}
+
+Le code se base sur une architecture basique MVC :
+
+\begin{itemize}
+\item Il n'y a qu'un seul contrôleur, le fichier \verb?Main.java?
+\item Le package \verb?models? contient les classes effectuant les requêtes à la
+base de données
+\item Les classes du package \verb?views? se chargent de l'affichage graphique
+\end{itemize}
+
+TODO : choix de conception particuliers ?
+
+\subsection*{Requêtes SQL}
+
+
+
+\subsection*{Tests}
 
 \end{document}

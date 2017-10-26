@@ -1,10 +1,14 @@
-package model;
+package models;
+import java.awt.Color;
 
 public class Quartier {
 	private String name;
 	private double lon;
 	private double lat;
 	private int amenityCount;
+	// We fix on 13 colors since we have 13 schools at most (could be generic, no time)
+	// No quartier with 8 school so we can reuse magenta
+	private static Color[] color = {Color.black, Color.blue, Color.cyan, Color.red, Color.gray, Color.green, Color.lightGray, Color.magenta, Color.orange, Color.pink, Color.darkGray, Color.yellow, Color.magenta};
 	
 
 	public Quartier(String name, double lon, double lat, int amenityCount){
@@ -57,5 +61,10 @@ public class Quartier {
 	@Override
 	public String toString(){
 		return this.name + ": " + this.lon + "; " + this.lat + " --> " + this.amenityCount;
+	}
+
+	/** @return color of the quartier */
+	public Color getColor() {
+		return color[this.amenityCount - 1];
 	}
 }

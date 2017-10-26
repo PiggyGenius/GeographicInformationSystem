@@ -1,4 +1,4 @@
-package database;
+package models;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -9,16 +9,18 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.awt.Color;
 
 import geoexplorer.gui.Polygon;
 import geoexplorer.gui.Point;
 import geoexplorer.gui.LineString;
-import model.Quartier;
 
 public final class DataBase {
 
-	private static String floatRegex = "-?[0-9]+\\.[0-9]+";
+	public static final String GrenobleSQL = 
+			"ST_XMin(bbox) > 5.7 "
+			+ "AND ST_XMax(bbox) < 5.8 "
+			+ "AND ST_YMin(bbox) > 45.1 "
+			+ "AND ST_YMax(bbox) < 45.2 ";
 
 	private static Connection connection;
 
@@ -76,19 +78,15 @@ public final class DataBase {
 	}
 
 	private static ResultSet getWays(String tag){
-		String query = "SELECT linestring FROM ways "
-			+ "WHERE tags?'" + tag + "' "
-			+ "AND ST_XMin(bbox) > 5.7 "
-			+ "AND ST_XMax(bbox) < 5.8 "
-			+ "AND ST_YMin(bbox) > 45.1 "
-			+ "AND ST_YMax(bbox) < 45.2 "
-			//+ "LIMIT 1000"
+		String query = "SELECT ST_Transform(linestring, 2154) FROM ways "
+			+ "WHERE " + GrenobleSQL + " AND tags?'" + tag + "' "
+			//+ "LIMIT 10000"
 			;
-		try {
-			Statement statement = connection.createStatement();
-			return statement.executeQuery(query);
-		} catch(SQLException e){
-			System.err.println("Error: " + e.getMessage());
+        try {
+            Statement statement = connection.createStatement();
+            return statement.executeQuery(query);
+        } catch(SQLException e){
+            System.err.println("Error: " + e.getMessage());
 			return null;
 		}
 	}
@@ -109,14 +107,75 @@ public final class DataBase {
 		}
 	}
 
-	private static Polygon toPolygon(org.postgis.LineString linestring) {
+	/** Answer to question 13 */
+	public static List<LineString> getCityBoundaries() {
+		List<LineString> boundaries = new LinkedList<LineString>();
+		String query = "SELECT ST_Transform(linestring, 2154) FROM ways "
+			+ "WHERE " + GrenobleSQL + "AND "
+			+ "tags->'boundary' = 'administrative' "
+			+ "AND tags->'admin_level' IN ('0', '1', '2', '3', '4', '5', '6') "
+			;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()) {
+				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
+				boundaries.add(toLineString(((org.postgis.LineString)geom.getGeometry())));
+			}
+			return boundaries;
+		} catch (SQLException e) {
+			System.err.println("Error: " + e.getMessage());
+			return null;
+		}
+	}
+
+
+	/** Answer to question 14b */
+	public static List<Polygon> getNoisePollutedZones() {
+		List<Polygon> res = new LinkedList<Polygon>();
+		String query = "SELECT ST_Buffer(ST_Transform(linestring, 2154), 200) FROM ways "
+			+ "WHERE " + GrenobleSQL+ "AND ("
+			+ "tags->'aeroway' = 'aerodrome'"
+			+ "OR tags->'highway' = 'motorway'"
+			+ "OR tags->'railway' = 'rail'"
+			+ ")"
+			;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()) {
+				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
+
+				if (geom.getGeometry() instanceof org.postgis.Polygon) {
+					org.postgis.Polygon pol = (org.postgis.Polygon)geom.getGeometry();
+					assert(pol.numRings() == 1);
+					res.add(toPolygon(pol.getRing(0)));
+				} else if (geom.getGeometry() instanceof org.postgis.MultiPolygon) {
+					org.postgis.MultiPolygon multiPol = (org.postgis.MultiPolygon)geom.getGeometry();
+					for (org.postgis.Polygon p : multiPol.getPolygons()) {
+						assert(p.numRings() == 1);
+						res.add(toPolygon(p.getRing(0)));
+					}
+				} else {
+					System.out.println("ERROR");
+				}
+			}
+		} catch(SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+			return null;
+		}
+		return res;
+	}
+
+
+
+	private static Polygon toPolygon(org.postgis.PointComposedGeom geom) {
 		Polygon polygon = new Polygon();
-		for (org.postgis.Point p : linestring.getPoints()) {
+		for (org.postgis.Point p : geom.getPoints()) {
 			polygon.addPoint(new Point(p.getX(), p.getY()));
 		}
 		return polygon;
 	}
-
 	private static LineString toLineString(org.postgis.LineString linestring) {
 		LineString line = new LineString();
 		for (org.postgis.Point p : linestring.getPoints()) {
