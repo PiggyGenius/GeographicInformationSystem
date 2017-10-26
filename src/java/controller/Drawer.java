@@ -6,18 +6,17 @@ import geoexplorer.gui.CoordinateConverter;
 import geoexplorer.gui.Polygon;
 import geoexplorer.gui.LineString;
 import geoexplorer.gui.Point;
+import model.Quartier;
 
 import java.util.HashMap;
 import java.util.List;
-import java.awt.Graphics2D;
+import java.awt.Color;
 
 public class Drawer{
 	private MapPanel map;
-	private CoordinateConverter converter;
 
-    public Drawer(MapPanel map, CoordinateConverter converter){
+    public Drawer(MapPanel map){
 		this.map = map;
-		this.converter = converter;
     }
 
 	public void drawBuildings(List<Polygon> buildings){
@@ -30,6 +29,16 @@ public class Drawer{
 	public void drawRoads(List<LineString> roads){
 		for(LineString linestring: roads){
 			map.addPrimitive(linestring);
+		}
+		map.autoAdjust();
+	}
+
+	public void drawAmenity(List<Quartier> quartierList){
+		Point point;
+		for(Quartier quartier: quartierList){
+			point = new Point(quartier.getLon(), quartier.getLat(), Color.RED);
+			point.setShape(Point.CROSS);
+			map.addPrimitive(point);
 		}
 		map.autoAdjust();
 	}

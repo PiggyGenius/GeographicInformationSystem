@@ -14,6 +14,7 @@ import java.awt.Color;
 import geoexplorer.gui.Polygon;
 import geoexplorer.gui.Point;
 import geoexplorer.gui.LineString;
+import model.Quartier;
 
 public final class DataBase {
 
@@ -29,6 +30,19 @@ public final class DataBase {
 
 	public static void setConnection(Connection connect) {
 		connection = connect;
+	}
+
+	public static List<Quartier> getQuartierSchool(){
+		List<Quartier> quartiers = new LinkedList<Quartier>();
+		ResultSet rs = getQuartierAmenity("school");
+		try {
+			while (rs.next())
+				quartiers.add(new Quartier(rs.getString(1), rs.getFloat(2), rs.getFloat(3), rs.getInt(4)));
+			return quartiers;
+		} catch(SQLException e){
+			System.err.println("Error: " + e.getMessage());
+			return null;
+		}
 	}
 
 	public static List<Polygon> getBuildingWays() {
@@ -70,11 +84,27 @@ public final class DataBase {
 			+ "AND ST_YMax(bbox) < 45.2 "
 			//+ "LIMIT 1000"
 			;
-        try {
-            Statement statement = connection.createStatement();
-            return statement.executeQuery(query);
-        } catch(SQLException e){
-            System.err.println("Error: " + e.getMessage());
+		try {
+			Statement statement = connection.createStatement();
+			return statement.executeQuery(query);
+		} catch(SQLException e){
+			System.err.println("Error: " + e.getMessage());
+			return null;
+		}
+	}
+
+	private static ResultSet getQuartierAmenity(String amenity){
+		// the_geom is already in srid 2154
+		String query = "SELECT quartier.quartier, ST_X(ST_Centroid(quartier.the_geom)) AS X, ST_Y(ST_Centroid(quartier.the_geom)) AS Y, COUNT(ways.id) FROM quartier, ways "
+			+ "WHERE ways.tags->'amenity' = '" + amenity + "' "
+			+ "AND ST_Contains(quartier.the_geom, ST_Transform(ST_MakePolygon(ST_AddPoint(ways.linestring, ST_StartPoint(ways.linestring))), 2154)) "
+			+ "GROUP BY quartier.quartier, X, Y"
+			;
+		try {
+			Statement statement = connection.createStatement();
+			return statement.executeQuery(query);
+		} catch(SQLException e){
+			System.err.println("Error: " + e.getMessage());
 			return null;
 		}
 	}
