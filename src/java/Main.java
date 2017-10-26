@@ -26,7 +26,7 @@ public class Main {
 		List<Polygon> buildingWays = DataBase.getBuildingWays();
 		List<LineString> roads = DataBase.getRoadWays();
 		List<Polygon> noisePollution = DataBase.getNoisePollutedZones();
-		List<LineString> boundaries = DataBase.getCityBoundaries();
+		List<LineString> boundaries = DataBase.getBoundaries();
         Utils.closeConnection();
 
 		MapPanel map = new MapPanel(x, y, mapWidth);

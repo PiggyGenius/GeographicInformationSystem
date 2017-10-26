@@ -71,7 +71,7 @@ WHERE srid = (
 );
 \end{lstlisting}
 
-Le système de coordonnées utilisé est WGS84, c'est-à-dire le système GPS.
+Le systÃ¨me de coordonnÃ©es utilisÃ© est WGS84, c'est-Ã -dire le systÃ¨me GPS.
 
 \newpage
 
@@ -151,11 +151,11 @@ WHERE srid = (
 );
 \end{lstlisting}
 
-Le système de référence est WGS84 et l'unité est le degré (\textit{degree}).
+Le systÃ¨me de rÃ©fÃ©rence est WGS84 et l'unitÃ© est le degrÃ© (\textit{degree}).
 
 \section*{Question 5.c}
 
-On travaille avec des géographies, dont l'unité est le mètre.
+On travaille avec des gÃ©ographies, dont l'unitÃ© est le mÃ¨tre.
 
 \begin{lstlisting}[language=SQL]
 SELECT tags->'highway', SUM(ST_Length(linestring::geography))/1000
@@ -169,7 +169,7 @@ ORDER BY SUM(ST_Length(linestring)) DESC;
 
 \section*{Question 6}
 
-On récupère tous les bâtiments de l'Ensimag depuis la table \verb?relation_members?.
+On rÃ©cupÃ¨re tous les bÃ¢timents de l'Ensimag depuis la table \verb?relation_members?.
 
 \begin{lstlisting}[language=SQL]
 SELECT SUM(ST_Area(ST_MakePolygon(ways.linestring)::geography))
@@ -192,9 +192,9 @@ WHERE
 
 \section*{Question 7}
 
-On considère qu'une école est contenue dans un quartier si sa zone géographique (\textit{linestring})
-est incluse dans celle du quartier. On commence par déterminer le système
-géographique utilisé par la table \verb?quartier? :
+On considÃ¨re qu'une Ã©cole est contenue dans un quartier si sa zone gÃ©ographique (\textit{linestring})
+est incluse dans celle du quartier. On commence par dÃ©terminer le systÃ¨me
+gÃ©ographique utilisÃ© par la table \verb?quartier? :
 
 \begin{lstlisting}[language=SQL]
 SELECT ST_SRID(the_geom)
@@ -209,8 +209,8 @@ st_srid
 (1 ligne)
 \end{lstlisting}
 
-Puis on convertit les écoles en polygônes et les transforme dans le bon
-système géographique avant de vérifier la relation d'inclusion avec les quartiers :
+Puis on convertit les Ã©coles en polygÃ´nes et les transforme dans le bon
+systÃ¨me gÃ©ographique avant de vÃ©rifier la relation d'inclusion avec les quartiers :
 
 \begin{lstlisting}[language=SQL]
 SELECT quartier.quartier, count(ways.id)
@@ -249,11 +249,11 @@ ABBAYE-JOUHAUX       |     5
 
 \section*{Question 8 (incomplet)}
 
-On définit le centre géographique d'une région comme la municipalité ayant une
-distance minimale avec sa municipalité la plus éloignée. On définit la distance
-entre deux villes comme celle entre les centroïdes des centroïdes de leurs bâtiments.
+On dÃ©finit le centre gÃ©ographique d'une rÃ©gion comme la municipalitÃ© ayant une
+distance minimale avec sa municipalitÃ© la plus Ã©loignÃ©e. On dÃ©finit la distance
+entre deux villes comme celle entre les centroÃ¯des des centroÃ¯des de leurs bÃ¢timents.
 
-On commence par récupérer les municipalités :
+On commence par rÃ©cupÃ©rer les municipalitÃ©s :
 
 \begin{lstlisting}[language=SQL]
 SELECT *
@@ -261,7 +261,7 @@ FROM relations
 WHERE tags->'boundary' = 'administrative' AND tags->'admin_level' = '8';
 \end{lstlisting}
 
-Une relation contient plusieurs éléments géométriques, listés dans la table
+Une relation contient plusieurs Ã©lÃ©ments gÃ©omÃ©triques, listÃ©s dans la table
 \verb?relation_members? :
 
 \begin{lstlisting}[language=SQL]
@@ -271,8 +271,8 @@ INNER JOIN relation_members ON relations.id = relation_members.relation_id
 WHERE tags->'boundary' = 'administrative' AND tags->'admin_level' = '8';
 \end{lstlisting}
 
-\verb?relation_members.member_type? fait référence à la table contenant les données
-géographiques :
+\verb?relation_members.member_type? fait rÃ©fÃ©rence Ã  la table contenant les donnÃ©es
+gÃ©ographiques :
 
 \begin{lstlisting}[language=SQL]
 SELECT DISTINCT(member_type)
@@ -288,8 +288,8 @@ N
 (3 rows)
 \end{lstlisting}
 
-Les bâtiments d'une ville sont stockés dans la table \verb?ways?. On calcule le centroïd
-de chaque municipalité :
+Les bÃ¢timents d'une ville sont stockÃ©s dans la table \verb?ways?. On calcule le centroÃ¯d
+de chaque municipalitÃ© :
 
 \begin{lstlisting}[language=SQL]
 SELECT relations.id, ST_Centroid(ST_Union(ways.linestring))
@@ -303,7 +303,7 @@ WHERE
 GROUP BY relations.id;
 \end{lstlisting}
 
-TODO : ce que contient la table ways pour les municipalités est étrange. Notamment,
+TODO : ce que contient la table ways pour les municipalitÃ©s est Ã©trange. Notamment,
 il n'y a aucune ligne avec building=yes.
 
 Puis, pour chaque ville, on calcule sa distance aux autres, prend celle maximale
@@ -316,10 +316,10 @@ et retourne la ville ayant la plus petite :
 
 \section*{Question 9 (incomplet)}
 
-Par "endroit", on comprendra "point géographique". La requête renverra, s'il
-existe, un \verb?Point? PostGIS éloigné d'au moins 10 kilomètres de tout bâtiment.
+Par "endroit", on comprendra "point gÃ©ographique". La requÃªte renverra, s'il
+existe, un \verb?Point? PostGIS Ã©loignÃ© d'au moins 10 kilomÃ¨tres de tout bÃ¢timent.
 
-Commençons par récupérer les bâtiments :
+CommenÃ§ons par rÃ©cupÃ©rer les bÃ¢timents :
 
 \begin{lstlisting}[language=SQL]
 SELECT *
@@ -329,30 +329,30 @@ WHERE tags->'building' = 'yes';
 
 \newpage
 
-\section*{Documentation de l'implémentation Java}
+\section*{Documentation de l'implÃ©mentation Java}
 
-une documentation concernant votre application Java, contenant entre autres un descriptif rapide des fonctionnalités, de l'architecture, des requêtes effectuées, des choix de conception, et des tests effectués (et leur résultat). Cette documentation doit être concise et précise (inutile de faire 42 pages de documentation ; vous n'aurez pas le temps de toute façon).
+une documentation concernant votre application Java, contenant entre autres un descriptif rapide des fonctionnalitÃ©s, de l'architecture, des requÃªtes effectuÃ©es, des choix de conception, et des tests effectuÃ©s (et leur rÃ©sultat). Cette documentation doit Ãªtre concise et prÃ©cise (inutile de faire 42 pages de documentation ; vous n'aurez pas le temps de toute faÃ§on).
 
 \subsection*{Usage}
 
-La commande \verb?make? permet de compiler le projet. \verb?make run? l'exécute.
+La commande \verb?make? permet de compiler le projet. \verb?make run? l'exÃ©cute.
 
-TODO : fonctionnalités implémentées
+TODO : fonctionnalitÃ©s implÃ©mentÃ©es
 
 \subsection*{Architecture du code}
 
 Le code se base sur une architecture basique MVC :
 
 \begin{itemize}
-\item Il n'y a qu'un seul contrôleur, le fichier \verb?Main.java?
-\item Le package \verb?models? contient les classes effectuant les requêtes à la
-base de données
+\item Il n'y a qu'un seul contrÃ´leur, le fichier \verb?Main.java?
+\item Le package \verb?models? contient les classes effectuant les requÃªtes Ã  la
+base de donnÃ©es
 \item Les classes du package \verb?views? se chargent de l'affichage graphique
 \end{itemize}
 
 TODO : choix de conception particuliers ?
 
-\subsection*{Requêtes SQL}
+\subsection*{RequÃªtes SQL}
 
 
 
