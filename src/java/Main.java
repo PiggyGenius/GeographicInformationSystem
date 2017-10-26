@@ -44,10 +44,10 @@ public class Main {
 		/* Draw polygons */
 		CoordinateConverter converter = new CoordinateConverter(frame.getWidth(), frame.getHeight(), x, y, mapWidth);
 		Drawer drawer = new Drawer(map, converter);
-		drawer.drawPolygons(buildingWays);
-		drawer.drawLineStrings(roads);
-		drawer.drawPolygons(noisePollution);
-		// drawer.drawLineStrings(boundaries);
+		// drawer.drawPolygons(buildingWays);
+		// drawer.drawLineStrings(roads);
+		// drawer.drawPolygons(noisePollution);
+		drawer.drawLineStrings(boundaries);
 
 		/* Draw polygons */
     }
