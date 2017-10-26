@@ -7,7 +7,7 @@ import geoexplorer.gui.Polygon;
 import geoexplorer.gui.LineString;
 import geoexplorer.gui.CoordinateConverter;
 import models.Quartier;
-import views.Drawer;
+import controllers.Drawer;
 
 import java.util.List;
 import java.util.LinkedList;
