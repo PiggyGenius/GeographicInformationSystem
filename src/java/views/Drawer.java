@@ -1,4 +1,4 @@
-package controller;
+package views;
 
 import geoexplorer.gui.GeoMainFrame;
 import geoexplorer.gui.MapPanel;

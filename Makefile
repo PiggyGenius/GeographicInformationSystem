@@ -1,7 +1,9 @@
 COMP_CLASSPATH = "lib/*:src/java"
 RUN_CLASSPATH = "bin:lib/*"
 
-all: Main
+all: Main_comp
+
+run: Main
 
 Test1_comp:
 	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/test/Test1.java

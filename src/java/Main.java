@@ -1,12 +1,12 @@
-import database.DataBase;
-import database.Utils;
+import models.DataBase;
+import models.Utils;
 import geoexplorer.gui.MapPanel;
 import geoexplorer.gui.GeoMainFrame;
 import geoexplorer.gui.Point;
 import geoexplorer.gui.Polygon;
 import geoexplorer.gui.LineString;
 import geoexplorer.gui.CoordinateConverter;
-import controller.Drawer;
+import views.Drawer;
 
 import java.util.List;
 import java.util.LinkedList;
