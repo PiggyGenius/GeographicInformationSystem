@@ -1,0 +1,472 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[top=1cm,bottom=1cm,right=1cm,left=1cm]{geometry}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+
+
+\usepackage{amsfonts, amsmath, amssymb, amstext, latexsym}
+\usepackage{epsfig}
+\usepackage{exscale}
+\usepackage{amsbsy}
+\usepackage{amsopn}
+\usepackage{listings}
+
+\newcommand{\noi}{\noindent}
+\newcommand{\dsp}{\displaystyle}
+\newcommand{\ind}{{{\large 1} \hspace*{-1.6mm} {\large 1}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   Page de garde   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% variable à redéfinir (placées sur la page de garde et sur l'entête)
+\def\typedeprojet{Systèmes d'information géographiques}
+\def\nomduprojet{TP OpenStreetMap}
+\def\dateduprojet{Octobre 2017}
+
+% définition des entêtes et pieds de page
+\pagestyle{fancy}
+
+% définition des marges pour les entêtes et pieds de page
+\renewcommand{\headrulewidth}{0.1pt}
+\renewcommand{\footrulewidth}{0.1pt}
+
+% entête de page
+\lhead{\includegraphics[height=1.2cm]{logo_ensimag.jpg}}
+\chead{\bf \typedeprojet}
+\rhead{\nomduprojet}
+
+% pied de page
+\lfoot{}
+\cfoot{}
+\rfoot{\thepage}
+
+% compte à partir de 0 => la 2e page est donc à 1
+\setcounter{page}{0}
+
+% re-définition des tailles d'entête et de texte
+\setlength{\headheight}{60pt}
+\setlength{\textheight}{710pt}
+
+% titre de la page de garde
+\title{
+	% illustrations
+	\begin{flushleft}
+		\includegraphics[width=5cm]{logo_ensimag.jpg} \hfill
+	\end{flushleft} 
+	% séparateur 1
+	{\rule{15cm}{1mm}}\vspace{7mm}
+	% titres
+	\begin{tabular}{p{0cm} r}
+		& {\Huge {\bf \typedeprojet}} \\[20pt]
+		& {\huge \nomduprojet}
+	\end{tabular}\\
+	% séparateur 2
+	\vspace{7mm}{\rule{15cm}{1mm}}\vspace{2mm} \\
+	% date
+	\hfill \large \dateduprojet \hspace{2cm}
+	% table des matières
+	\vfill
+}
+
+% auteur(s)
+\author{
+	\begin{tabular}{p{15cm}}
+		\Large Maxime Deloche, Ludovic Carré \& Vincent Lefoulon
+	\end{tabular} \\
+	\hline
+}
+
+% pas de date, elle est dans le titre
+\date{}
+
+\begin{document}
+\maketitle
+
+\thispagestyle{empty} % pas de numérotation de la page de garde
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Question 1}
+
+\begin{lstlisting}[language=SQL]
+SELECT COUNT(id) FROM users;
+\end{lstlisting}
+
+\begin{lstlisting}
+count 
+-------
+  4576
+  (1 row)
+\end{lstlisting}
+
+\vspace{1cm}
+\section*{Question 2.a}
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_X(geom), ST_Y(geom), ST_Z(geom)
+FROM nodes WHERE id = 1787038609;
+\end{lstlisting}
+
+\begin{lstlisting}
+st_x      |   st_y    | st_z 
+----------+-----------+------
+5.7680106 | 45.192893 |     
+(1 row)
+\end{lstlisting}
+
+\vspace{1cm}
+\section*{Question 2.b}
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM spatial_ref_sys
+WHERE srid = (
+    SELECT ST_SRID(geom) FROM nodes WHERE id = 1787038609
+);
+\end{lstlisting}
+
+\begin{lstlisting}
+GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",...
+\end{lstlisting}
+
+Le système de coordonnées utilisé est WGS84, c'est-à-dire le système GPS.
+
+\vspace{1cm}
+\section*{Question 3}
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_AsEWKT(ST_Centroid(linestring)) FROM ways
+WHERE tags->'amenity' = 'townhall' AND tags->'name' like '%Grenoble%';
+\end{lstlisting}
+
+\begin{lstlisting}
+st_asewkt                      
+----------------------------------------------------
+ SRID=4326;POINT(5.73643908557793 45.1864548121024)
+ (1 row)
+\end{lstlisting}
+
+La fonction ST\_AsEWKT \(Well-Known Text\) retourne une représentation textuelle d'un objet 'geometry'.
+
+\vspace{1cm}
+\section*{Question 4}
+
+\begin{lstlisting}[language=SQL]
+SELECT tags->'highway', COUNT(id) FROM ways WHERE tags?'highway'
+GROUP BY tags->'highway' ORDER BY COUNT(id) DESC;
+\end{lstlisting}
+
+\begin{lstlisting}
+?column?                 | count 
+-------------------------+-------
+residential              | 94356
+unclassified             | 77678
+service                  | 64461
+track                    | 58276
+tertiary                 | 21923
+footway                  | 21742
+path                     | 21413
+secondary                | 18444
+...
+\end{lstlisting}
+
+\vspace{1cm}
+\section*{Question 5.a}
+
+\begin{lstlisting}[language=SQL]
+SELECT tags->'highway', SUM(ST_Length(linestring))
+FROM ways WHERE tags?'highway'
+GROUP BY tags->'highway' ORDER BY SUM(ST_Length(linestring)) DESC;
+\end{lstlisting}
+
+\begin{lstlisting}
+?column?                 |         sum          
+-------------------------+----------------------
+unclassified             |     435.285712879273
+track                    |     343.366696791793
+residential              |     210.396982404606
+tertiary                 |     208.294200085326
+path                     |     134.367018999509
+...
+\end{lstlisting}
+
+\vspace{1cm}
+\section*{Question 5.b}
+
+La \href{http://postgis.org/docs/ST_Length.html}{documentation} dit : \textit{geometry are in units of spatial reference and geography are in meters (default spheroid)}
+
+\begin{lstlisting}[language=SQL]
+SELECT * FROM spatial_ref_sys
+WHERE srid = (SELECT ST_SRID(linestring) FROM ways LIMIT 1);
+\end{lstlisting}
+
+\begin{lstlisting}
+GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",...
+\end{lstlisting}
+
+Le système de référence est WGS84 et l'unité est donc le degré (\textit{degree}).
+
+\vspace{1cm}
+\section*{Question 5.c}
+
+On travaille avec des géographies, dont l'unité est le mètre.
+
+\begin{lstlisting}[language=SQL]
+SELECT tags->'highway', SUM(ST_Length(linestring::geography))/1000
+FROM ways WHERE tags ? 'highway'
+GROUP BY tags->'highway' ORDER BY SUM(ST_Length(linestring)) DESC;
+\end{lstlisting}
+
+\begin{lstlisting}
+         ?column?         |      ?column?      
+--------------------------+--------------------
+ unclassified             |   39840.3847465004
+ track                    |   31548.5308675041
+ residential              |    19217.248646164
+ tertiary                 |   19092.5143218903
+ path                     |   12385.5371652032
+ secondary                |   11054.7544485223
+ service                  |   5721.88752214514
+ primary                  |   4905.59039039862
+ motorway                 |   2645.76412625689
+ footway                  |    2452.9424121304
+ cycleway                 |   927.600411902203
+ road                     |   769.272454468655
+ trunk                    |   647.685572912772
+ motorway_link            |   505.818144374077
+...
+\end{lstlisting}
+
+\vspace{1cm}
+\section*{Question 6}
+
+On récupère tous les bâtiments de l'Ensimag depuis la table \verb?relation_members?.
+
+\begin{lstlisting}[language=SQL]
+SELECT SUM(ST_Area(ST_MakePolygon(ways.linestring)::geography))
+FROM relations, relation_members, ways
+WHERE
+	relation_members.relation_id = relations.id AND
+	relation_members.member_id = ways.id AND
+	relations.tags->'name' = 'Ensimag';
+\end{lstlisting}
+
+\begin{lstlisting}
+       sum
+------------------
+ 2640.86233445186
+(1 ligne)
+\end{lstlisting}
+
+\vspace{1cm}
+\section*{Question 7}
+
+On considère qu'une école est contenue dans un quartier si sa zone géographique (\textit{linestring})
+est incluse dans celle du quartier. On commence par déterminer le système
+géographique utilisé par la table \verb?quartier? :
+
+\begin{lstlisting}[language=SQL]
+SELECT ST_SRID(the_geom) FROM quartier;
+\end{lstlisting}
+
+\begin{lstlisting}[language=SQL]
+st_srid 
+---------
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+    2154
+\end{lstlisting}
+
+Puis on convertit les écoles en polygones et les transforme dans le bon système géographique avant de vérifier la relation d'inclusion avec les quartiers.
+
+\begin{lstlisting}[language=SQL]
+SELECT quartier.quartier, count(ways.id)
+FROM quartier, ways
+WHERE
+    ways.tags->'amenity' = 'school' AND
+    ST_Contains(
+        quartier.the_geom,
+        ST_Transform(ways.linestring, 2154)
+    )
+GROUP BY quartier.quartier ORDER BY count(ways.id) DESC;
+\end{lstlisting}
+
+\begin{lstlisting}
+quartier             | count 
+---------------------+-------
+BERRIAT ST BRUNO     |    13
+CENTRE VILLLE        |    12
+EXPOSITION-BAJATIERE |     9
+RONDEAU-LIBERATION   |     7
+EAUX CLAIRES         |     6
+ABBAYE-JOUHAUX       |     5
+...
+\end{lstlisting}
+
+\vspace{1cm}
+\section*{Question 8 (incomplet)}
+
+On définit le centre géographique d'une région comme la municipalité ayant une
+distance minimale avec sa municipalité la plus éloignée. On définit la distance
+entre deux villes comme celle entre les centroïdes des centroïdes de leurs bâtiments.
+
+On commence par récupérer les municipalités :
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM relations
+WHERE tags->'boundary' = 'administrative' AND tags->'admin_level' = '8';
+\end{lstlisting}
+
+Une relation contient plusieurs éléments géométriques, listés dans la table
+\verb?relation_members? :
+
+\begin{lstlisting}[language=SQL]
+SELECT *
+FROM relations
+INNER JOIN relation_members 
+ON relations.id = relation_members.relation_id
+WHERE tags->'boundary' = 'administrative' 
+AND tags->'admin_level' = '8';
+\end{lstlisting}
+
+\verb?relation_members.member_type? fait référence à la table contenant les données
+géographiques :
+
+\begin{lstlisting}[language=SQL]
+SELECT DISTINCT(member_type)
+FROM relation_members;
+\end{lstlisting}
+
+\begin{lstlisting}
+member_type 
+-------------
+W
+R
+N
+(3 rows)
+\end{lstlisting}
+
+Les bâtiments d'une ville sont stockés dans la table \verb?ways?. On calcule le centroïd
+de chaque municipalité :
+
+\begin{lstlisting}[language=SQL]
+SELECT relations.id, ST_Centroid(ST_Union(ways.linestring))
+FROM relations
+JOIN relation_members ON relations.id = relation_members.relation_id
+JOIN ways ON relation_members.member_id = ways.id
+WHERE
+    relations.tags->'boundary' = 'administrative' AND
+    relations.tags->'admin_level' = '8' AND
+    relation_members.member_type = 'W'
+GROUP BY relations.id;
+\end{lstlisting}
+
+TODO : ce que contient la table ways pour les municipalités est étrange. Notamment,
+il n'y a aucune ligne avec building=yes.
+
+Puis, pour chaque ville, on calcule sa distance aux autres, prend celle maximale
+et retourne la ville ayant la plus petite :
+
+\begin{lstlisting}[language=SQL]
+\end{lstlisting}
+
+\vspace{1cm}
+% \section*{Question 9 (incomplet)}
+
+% Par "endroit", on comprendra "point géographique". La requête renverra, s'il
+% existe, un \verb?Point? PostGIS éloigné d'au moins 10 kilomètres de tout bâtiment.
+
+% Commençons par récupérer les bâtiments :
+
+% \begin{lstlisting}[language=SQL]
+% SELECT * FROM ways
+% WHERE tags->'building' = 'yes';
+% \end{lstlisting}
+
+\vspace{1cm}
+\section*{Documentation de l'implémentation Java}
+
+\subsection*{Usage}
+
+Un Makefile permet d'utiliser le projet. 
+\begin{itemize}
+	\item \verb?make? : compile le projet
+    \item \verb?make run? : compile et lance le projet
+    \item \verb?make Question10? : compile et lance le code de la question 10 (test de l'accès à la base de données)
+    \item \verb?make Question11? : compile et lance le code de la question 11 (points dont le nom ressemble à "Dom\_\_ne \_niversit\%"
+\end{itemize}
+
+\subsection{Bonus}
+
+Les questions bonus 14\_a et 14\_b ont été implémentées. La question A récupère les noms et centroïdes de chacun des quartiers ainsi que le nombre d'écoles dans ces derniers. Le package graphique ne permet pas d'afficher du texte à l'écran (ce que l'on aurait pu faire avec un JLabel par exemple) et on a donc choisi d'utiliser un code pour représenter le nombre d'écoles dans un quartier.
+
+Un cercle de couleur est donc ajouté au centroïde de chacun de ces quartiers, la correspondance couleur/nombre d'écoles est donné par le programme lors de son exécution.
+L'intérêt de la question étant la requête avec les bonnes coordonnées géographiques pour l'affichage, nous n'avons pas réimplémenté JLabel ou écrit du code compliqué pour le choix de la couleur d'un point.
+
+Cela implique que le code ne peut pas être exécuté sur une autre ville que Grenoble puisque l'association couleur/écoles est fixe et propre à Grenoble.
+
+Pour la question 14\_b, nous avons représenté la nuisance sonore par des polygones. La taille de la zone considérée comme affectée par la nuisance a été fixée, après une rapide recherche, à 200m des sources de nuisance. Une fonction plus précise nécessiterait d'évaluer la puissance des nuisances et leur degré d'atténuation en fonction de la distance.
+
+\subsection*{Architecture du code}
+
+Le code se base sur une architecture basique MVC :
+
+\begin{itemize}
+\item Il n'y a qu'un seul contrôleur, le fichier \verb?Main.java?
+\item Le package \verb?models? contient les classes effectuant les requêtes à la base de données \item Les classes du package \verb?views? se chargent de l'affichage graphique
+\end{itemize}
+
+TODO : choix de conception particuliers ?
+
+\subsection*{Requêtes SQL}
+
+Les requêtes SQL sont effectuées via la classe statique \verb?models.DataBase?. Elle s'occupe de sauvegarder un objet Connection, et contient les fonctions :
+\begin{itemize}
+	\item \verb?getQuartierSchool()? : retourne la liste des quartiers (\verb?Quartier?)
+	\item \verb?getBuildingWays()? : retourne la liste des immeubles (\verb?Polygon?)
+	\item \verb?getRoadWays()? : retourne la liste des routes (\verb?LineString?)
+    \item \verb?getBoundaries()? : retourne la liste des frontières entre quartiers (\verb?LineString?)
+    \item \verb?getNoisePollutedZones()? : retourne la listes des zones (\verb?Polygon?) soumises à des nuisances sonores
+\end{itemize}
+
+Les requêtes récupèrent des objets org.postgis et les convertissent (via des fonctions privées) en objets (Polygon, LineString...) de notre modèle.
+
+Toutes ces requêtes sont effectuées sur la ville de Grenoble : une variable globale en début de fichier est à ajouter à la clause WHERE des requêtes, ce qui permet de changer facilement les coordonnées de la zone couverte par l'application.
+
+\subsection*{Tests}
+
+Nous avons comparé les résultats de l'affichage avec la carte de Grenoble sur le site web de openstreetmap pour vérifier la correspondance. Nous avons également confirmer le résultat sur la somme de la taille des routes de Grenoble sur Internet car la valeur ne nous semblait pas évidente.
+
+\newpage
+Voici la carte obtenue avec notre programme :
+
+\includegraphics[height=23cm]{map.png}
+
+\end{document}
