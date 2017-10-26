@@ -113,7 +113,6 @@ public final class DataBase {
 		String query = "SELECT ST_Transform(linestring, 2154) FROM ways "
 			+ "WHERE " + GrenobleSQL + "AND "
 			+ "tags->'boundary' = 'administrative' "
-			+ "AND tags->'admin_level' IN ('0', '1', '2', '3', '4', '5', '6') "
 			;
 		try {
 			Statement statement = connection.createStatement();

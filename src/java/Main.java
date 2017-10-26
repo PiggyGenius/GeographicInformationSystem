@@ -40,6 +40,7 @@ public class Main {
 		drawer.drawLineStrings(boundaries);
 		
 		printColorLegend();
+		drawer.drawLineStrings(boundaries);
     }
 
 	private static void printColorLegend(){
