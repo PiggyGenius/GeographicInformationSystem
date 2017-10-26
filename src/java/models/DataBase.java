@@ -95,7 +95,7 @@ public final class DataBase {
 		// the_geom is already in srid 2154
 		String query = "SELECT quartier.quartier, ST_X(ST_Centroid(quartier.the_geom)) AS X, ST_Y(ST_Centroid(quartier.the_geom)) AS Y, COUNT(ways.id) FROM quartier, ways "
 			+ "WHERE ways.tags->'amenity' = '" + amenity + "' "
-			+ "AND ST_Contains(quartier.the_geom, ST_Transform(ST_MakePolygon(ST_AddPoint(ways.linestring, ST_StartPoint(ways.linestring))), 2154)) "
+			+ "AND ST_Contains(quartier.the_geom, ST_Transform(ways.linestring, 2154)) "
 			+ "GROUP BY quartier.quartier, X, Y"
 			;
 		try {

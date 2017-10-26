@@ -1,8 +1,8 @@
-package test;
+package tests;
 
-import database.Utils;
+import models.Utils;
 
-public class Test1 {
+public class Question10 {
 
     public static final void main(String[] args){
         Utils.getConnection();

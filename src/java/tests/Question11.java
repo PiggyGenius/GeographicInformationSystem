@@ -1,4 +1,4 @@
-package test;
+package tests;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,9 +6,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import database.Utils;
+import models.Utils;
 
-public class Test2 {
+public class Question11 {
 
     public static final void main(String[] args){
         if(args.length != 1){

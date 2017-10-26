@@ -5,16 +5,16 @@ all: Main_comp
 
 run: Main
 
-Test1_comp:
-	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/test/Test1.java
-Test2_comp:
-	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/test/Test2.java
+Question10_comp:
+	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/tests/Question10.java
+Question11_comp:
+	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/tests/Question11.java
 Main_comp:
 	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/Main.java
 
-Test1: Test1_comp
-	java -classpath $(RUN_CLASSPATH) test.Test1
-Test2: Test2_comp
-	java -classpath $(RUN_CLASSPATH) test.Test2 "Dom__ne _niversit%"
+Question10: Question10_comp
+	java -classpath $(RUN_CLASSPATH) tests.Question10
+Question11: Question11_comp
+	java -classpath $(RUN_CLASSPATH) tests.Question11 "Dom__ne _niversit%"
 Main: Main_comp
 	java -classpath $(RUN_CLASSPATH) Main
