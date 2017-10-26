@@ -20,17 +20,25 @@ public class Drawer{
 		this.converter = converter;
     }
 
-	public void drawBuildings(List<Polygon> buildings){
-		for(Polygon polygon: buildings){
-			map.addPrimitive(polygon);
+	public void drawPolygons(List<Polygon> polygons){
+		if (polygons != null) {
+			for(Polygon polygon: polygons){
+				map.addPrimitive(polygon);
+			}
+			map.autoAdjust();
+		} else {
+			System.err.println("Error: null parameter in drawPolygons.");
 		}
-		map.autoAdjust();
 	}
 
-	public void drawRoads(List<LineString> roads){
-		for(LineString linestring: roads){
-			map.addPrimitive(linestring);
+	public void drawLineStrings(List<LineString> lines) {
+		if (lines != null) {
+			for(LineString linestring: lines){
+				map.addPrimitive(linestring);
+			}
+			map.autoAdjust();
+		} else {
+			System.err.println("Error: null parameter in drawLineStrings.");
 		}
-		map.autoAdjust();
 	}
 }

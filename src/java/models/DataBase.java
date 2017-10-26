@@ -22,6 +22,7 @@ public final class DataBase {
 			+ "AND ST_XMax(bbox) < 5.8 "
 			+ "AND ST_YMin(bbox) > 45.1 "
 			+ "AND ST_YMax(bbox) < 45.2 ";
+
 	private static Connection connection;
 
 	private DataBase(){}
@@ -79,8 +80,30 @@ public final class DataBase {
 	}
 
 
+	/** Answer to question 13 */
+	public static List<LineString> getCityBoundaries() {
+		List<LineString> boundaries = new LinkedList<LineString>();
+		String query = "SELECT ST_Transform(linestring, 2154) FROM ways "
+			+ "WHERE " + GrenobleSQL + "AND "
+			+ "tags->'boundary' = 'administrative' "
+			+ "AND tags->'admin_level' IN ('0', '1', '2', '3', '4', '5', '6') "
+			;
+		try {
+			Statement statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()) {
+				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
+				boundaries.add(toLineString(((org.postgis.LineString)geom.getGeometry())));
+			}
+			return boundaries;
+		} catch (SQLException e) {
+			System.err.println("Error: " + e.getMessage());
+			return null;
+		}
+	}
 
 
+	/** Answer to question 14b */
 	public static List<Polygon> getNoisePollutedZones() {
 		List<Polygon> res = new LinkedList<Polygon>();
 		String query = "SELECT ST_Buffer(ST_Transform(linestring, 2154), 200) FROM ways "
