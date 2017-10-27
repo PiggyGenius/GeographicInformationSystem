@@ -18,36 +18,63 @@ import java.util.logging.Logger;
 
 public class Main {
 
+	private static boolean plotBuildings = false;
+	private static boolean plotRoads = false;
+	private static boolean plotNoisePollution = false;
+	private static boolean plotStations = false;
+	private static boolean plotSchools = false;
+
 	public static final void main(String[] args){
+
+		parseArgs(args);
+
 		double x = 0.0;
 		double y = 0.0;
 		double mapWidth = 500.0;
 
 		DataBase.setConnection(Utils.getConnection());
-		List<Quartier> quartiers = DataBase.getQuartierSchool();
-		List<Polygon> buildingWays = DataBase.getBuildingWays();
-		List<LineString> roads = DataBase.getRoadWays();
-		List<Polygon> noisePollution = DataBase.getNoisePollutedZones();
-		List<LineString> boundaries = DataBase.getBoundaries();
+
+		List<Quartier> quartiers = null;
+		List<Polygon> buildingWays = null;
+		List<LineString> roads = null;
+		List<Polygon> noisePollution = null;
+		List<Point> stations = null;
+
+		if (plotSchools) quartiers = DataBase.getQuartierSchool();
+		if (plotBuildings) buildingWays = DataBase.getBuildingWays();
+		if (plotRoads) roads = DataBase.getRoadWays();
+		if (plotNoisePollution) noisePollution = DataBase.getNoisePollutedZones();
+		if (plotStations) stations = DataBase.getTransportStations();
+
         Utils.closeConnection();
 
 		MapPanel map = new MapPanel(x, y, mapWidth);
 		GeoMainFrame frame = new GeoMainFrame("Grenoble map", map);
 
 		Drawer drawer = new Drawer(map);
-        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing buildings...");
-		drawer.drawPolygons(buildingWays);
-        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing schools...");
-		drawer.drawAmenity(quartiers);
-        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing roads...");
-		drawer.drawLineStrings(roads);
-        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing noise pollution...");
-		drawer.drawPolygons(noisePollution);
-        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing boundaries...");
-		drawer.drawLineStrings(boundaries);
-		
-		printColorLegend();
-		drawer.drawLineStrings(boundaries);
+		if (plotBuildings) {
+			Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing buildings...");
+			drawer.drawPolygons(buildingWays);
+		}
+		if (plotRoads) {
+			Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing roads...");
+			drawer.drawLineStrings(roads);
+		}
+		if (plotNoisePollution) {
+			Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing noise pollution...");
+			drawer.drawPolygons(noisePollution);
+		}
+		if (plotStations) {
+			Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing transport stations...");
+			drawer.drawPoints(stations);
+		}
+		if (plotSchools) {
+			Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing schools...");
+			drawer.drawAmenity(quartiers);
+			printColorLegend();
+		}
+
+		map.autoAdjust();
     }
 
 	private static void printColorLegend(){
@@ -63,5 +90,31 @@ public class Main {
 		System.out.println("10 --> pink");
 		System.out.println("12 --> yellow");
 		System.out.println("13 --> magenta");
+	}
+
+	private static void parseArgs(String[] args) {
+		if (args.length == 0) {
+			plotBuildings = true;
+			plotRoads = true;
+			plotNoisePollution = true;
+			plotStations = true;
+			plotSchools = true;
+			return;
+		}
+
+		for (String s : args) {
+			switch (s) {
+				case "buildings":
+					plotBuildings = true; break;
+				case "roads":
+					plotRoads = true; break;
+				case "noise":
+					plotNoisePollution = true; break;
+				case "stations":
+					plotStations = true; break;
+				case "schools":
+					plotSchools = true; break;
+			}
+		}
 	}
 }

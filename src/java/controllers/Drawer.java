@@ -23,9 +23,6 @@ public class Drawer{
 			for(Polygon polygon: polygons){
 				map.addPrimitive(polygon);
 			}
-			map.autoAdjust();
-		} else {
-			System.err.println("Error: null parameter in drawPolygons.");
 		}
 	}
 
@@ -34,19 +31,26 @@ public class Drawer{
 			for(LineString linestring: lines){
 				map.addPrimitive(linestring);
 			}
-			map.autoAdjust();
-		} else {
-			System.err.println("Error: null parameter in drawLineStrings.");
 		}
 	}
 
 	public void drawAmenity(List<Quartier> quartierList){
-		Point point;
-		for(Quartier quartier: quartierList){
-			point = new Point(quartier.getLon(), quartier.getLat(), quartier.getColor());
-			point.setShape(Point.CIRCLE);
-			map.addPrimitive(point);
+		if (quartierList != null) {
+			Point point;
+			for(Quartier quartier: quartierList){
+				point = new Point(quartier.getLon(), quartier.getLat(), quartier.getColor());
+				point.setShape(Point.CIRCLE);
+				map.addPrimitive(point);
+			}
 		}
-		map.autoAdjust();
+	}
+
+	public void drawPoints(List<Point> pointList) {
+		if (pointList != null) {
+			for (Point point: pointList) {
+				point.setShape(Point.SQUARE);
+				map.addPrimitive(point);
+			}
+		}
 	}
 }

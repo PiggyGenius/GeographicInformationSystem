@@ -108,20 +108,20 @@ public final class DataBase {
 	}
 
 	/** Answer to question 13 */
-	public static List<LineString> getBoundaries() {
-		List<LineString> boundaries = new LinkedList<LineString>();
-		String query = "SELECT ST_Transform(linestring, 2154) FROM ways "
-			+ "WHERE " + GrenobleSQL + "AND "
-			+ "tags->'boundary' = 'administrative' "
-			;
+	public static List<Point> getTransportStations() {
+		List<Point> stations = new LinkedList<Point>();
+		String query = "SELECT ST_Transform(geom, 2154) FROM nodes "
+			+ "WHERE ST_X(geom) BETWEEN 5.7 AND 5.8 "
+			+ "AND ST_Y(geom) BETWEEN 45.1 AND 45.2 "
+			+ "AND tags?'public_transport'";
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()) {
 				org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
-				boundaries.add(toLineString(((org.postgis.LineString)geom.getGeometry())));
+				stations.add(toPoint(((org.postgis.Point)geom.getGeometry())));
 			}
-			return boundaries;
+			return stations;
 		} catch (SQLException e) {
 			System.err.println("Error: " + e.getMessage());
 			return null;
@@ -181,5 +181,9 @@ public final class DataBase {
 			line.addPoint(new Point(p.getX(), p.getY()));
 		}
 		return line;
+	}
+
+	private static Point toPoint(org.postgis.Point point) {
+		return new Point(point.getX(), point.getY());
 	}
 }
