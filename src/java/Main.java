@@ -11,6 +11,8 @@ import controllers.Drawer;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 
@@ -33,10 +35,15 @@ public class Main {
 		GeoMainFrame frame = new GeoMainFrame("Grenoble map", map);
 
 		Drawer drawer = new Drawer(map);
+        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing buildings...");
 		drawer.drawPolygons(buildingWays);
+        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing schools...");
 		drawer.drawAmenity(quartiers);
+        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing roads...");
 		drawer.drawLineStrings(roads);
+        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing noise pollution...");
 		drawer.drawPolygons(noisePollution);
+        Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing boundaries...");
 		drawer.drawLineStrings(boundaries);
 		
 		printColorLegend();
