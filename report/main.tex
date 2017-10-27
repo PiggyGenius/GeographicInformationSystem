@@ -460,6 +460,94 @@ Les requêtes récupèrent des objets org.postgis et les convertissent (via des 
 
 Toutes ces requêtes sont effectuées sur la ville de Grenoble : une variable globale en début de fichier est à ajouter à la clause WHERE des requêtes, ce qui permet de changer facilement les coordonnées de la zone couverte par l'application.
 
+\subsubsection*{14.c}
+
+Pour simplifier le quadrillage, on considère la région Rhône-Alpes comme rectangulaire.
+On commence par récupérer ses coins :
+
+\begin{lstlisting}[language=SQL]
+SELECT MAX(ST_XMax(linestring)) as xmax,
+       MAX(ST_YMax(linestring)) as ymax,
+       MIN(ST_XMin(linestring)) as xmin,
+       MIN(ST_YMin(linestring)) as ymin
+FROM ways;
+\end{lstlisting}
+
+On génère ensuite le quadrillage avec la fonction SQL fournie \href{https://gis.stackexchange.com/a/16390}{ici}.
+Pour cela, on récupère les dimensions du rectangle et détermine les paramètres
+de la grille :
+
+\begin{lstlisting}
+dy = ymax - ymin = 4.216852
+dx = xmax - xmin = 7.2422614
+xsize = 0.2 (Il faut que dx en soit multiple. On arrondit dx a 7.2)
+ysize = 0.2 (Il faut que dy en soit multiple. On arrondit dy a 4.2)
+nrow = 4.2 / 0.2 = 21
+ncol = 7.2 / 0.2 = 36
+x0 = xmin
+y0 = ymin
+\end{lstlisting}
+
+On peut alors générer le quadrillage :
+
+\begin{lstlisting}[language=SQL]
+SELECT * FROM ST_CreateFishnet(21, 36, 0.2, 0.2, 0.6986247, 43.3160588);
+\end{lstlisting}
+
+\begin{lstlisting}
+row | col |                                                                                            geom                                                                                            
+-----+-----+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1 |   1 | 01030000000100000005000000A1B0D52F225BE63F77CE609D74A84540A1B0D52F225BE63F1168FA360EC2454008173C9688C1EC3F1168FA360EC2454008173C9688C1EC3F77CE609D74A84540A1B0D52F225BE63F77CE609D74A84540
+2 |   1 | 01030000000100000005000000A1B0D52F225BE63F1168FA360EC24540A1B0D52F225BE63FAB0194D0A7DB454008173C9688C1EC3FAB0194D0A7DB454008173C9688C1EC3F1168FA360EC24540A1B0D52F225BE63F1168FA360EC24540
+3 |   1 | 01030000000100000005000000A1B0D52F225BE63FAA0194D0A7DB4540A1B0D52F225BE63F449B2D6A41F5454008173C9688C1EC3F449B2D6A41F5454008173C9688C1EC3FAA0194D0A7DB4540A1B0D52F225BE63FAA0194D0A7DB4540
+...
+\end{lstlisting}
+
+La colonne \verb?geom? contient une géométrie de type polygône. Il ne reste plus,
+pour chaque zone, qu'à faire l'intersection avec chaque bâtiment et regarder si
+elle est nulle ou non. Contrairement à la question 7 où on testait l'inclusion,
+on s'intéresse ici à l'intersection, sinon un bâtiment chevauchant plusieurs
+zones ne compterait pour aucune.
+
+\subsubsection*{14.d}
+
+Commençons par nous donner une idée des types de bâtiments à notre disposition :
+
+\begin{lstlisting}[language=SQL]
+SELECT DISTINCT(tags->'amenity') FROM ways WHERE tags ? 'amenity';
+\end{lstlisting}
+
+On choisira de représenter les zones touristiques par la densité des types de
+bâtiments suivants :
+
+\begin{lstlisting}
+cinema
+bar;nightclub
+bar;restaurant
+bar
+ice_cream
+nightclub
+casino
+pub
+park
+restaurant
+cafe
+\end{lstlisting}
+
+On aurait aussi pu représenter les zones culturelles :
+
+\begin{lstlisting}
+school
+library
+theatre
+college
+arts_centre
+conference_centre
+university
+\end{lstlisting}
+
+Puis on suit la même stratégie de quadrillage qu'en 14.c.
+
 \subsection*{Tests}
 
 Nous avons comparé les résultats de l'affichage avec la carte de Grenoble sur le site web de openstreetmap pour vérifier la correspondance. Nous avons également confirmer le résultat sur la somme de la taille des routes de Grenoble sur Internet car la valeur ne nous semblait pas évidente.
