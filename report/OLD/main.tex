@@ -460,65 +460,6 @@ Les requêtes récupèrent des objets org.postgis et les convertissent (via des 
 
 Toutes ces requêtes sont effectuées sur la ville de Grenoble : une variable globale en début de fichier est à ajouter à la clause WHERE des requêtes, ce qui permet de changer facilement les coordonnées de la zone couverte par l'application.
 
-\subsubsection*{Question 12}
-
-\begin{lstlisting}[language=SQL]
-SELECT ST_Transform(linestring, 2154) FROM ways
-WHERE ST_XMin(bbox) > 5.7 AND ST_XMax(bbox) < 5.8
-AND ST_YMin(bbox) > 45.1 AND ST_YMax(bbox) < 45.2
-AND tags?'building';
-\end{lstlisting}
-
-Cette requête nous donne tous les bâtiments dans Grenoble avec la projection Lambert. Ces géométries sont ensuite converties en Polygones par l'application Java.
-
-\begin{lstlisting}[language=SQL]
-SELECT ST_Transform(linestring, 2154) FROM ways
-WHERE ST_XMin(bbox) > 5.7 AND ST_XMax(bbox) < 5.8
-AND ST_YMin(bbox) > 45.1 AND ST_YMax(bbox) < 45.2
-AND tags?'highway';
-\end{lstlisting}
-
-Cette requête nous donne tous les routes dans Grenoble avec la projection Lambert. Ces géométries sont ensuite converties en Linestring par l'application Java.
-
-\subsubsection*{Question bonus 13}
-
-\begin{lstlisting}[language=SQL]
-SELECT ST_Transform(linestring, 2154) FROM ways
-WHERE ST_XMin(bbox) > 5.7 AND ST_XMax(bbox) < 5.8
-AND ST_YMin(bbox) > 45.1 AND ST_YMax(bbox) < 45.2
-AND tags->'boundary' = 'administrative';
-\end{lstlisting}
-
-Cette requête nous donne tous les contours des quartiers de Grenoble. Ces géométries sont ensuite converties en Linestring par l'application Java.
-
-\subsubsection*{Question bonus 14\_a}
-
-\begin{lstlisting}[language=SQL]
-SELECT quartier.quartier, ST_X(ST_Centroid(quartier.the_geom)) AS X, 
-ST_Y(ST_Centroid(quartier.the_geom)) AS Y, COUNT(ways.id) 
-FROM quartier, ways
-WHERE ways.tags->'amenity' = 'school'
-AND ST_Contains(quartier.the_geom, ST_Transform(ways.linestring, 2154))
-GROUP BY quartier.quartier, X, Y;
-\end{lstlisting}
-
-La requête est pratiquement identique à celle de la question 7, on compte le nombre d'écoles contenu par quartier et l'on récupère le nom et la longitude/latitude du centroïde de chacun des quartiers.
-La question parle de boulangeries en faisant référence à la question 7, mais la question parle d'écoles donc j'ai supposé qu'il s'agissait d'une erreur dans l'énoncé.
-
-
-\subsubsection*{Question bonus 14\_b}
-
-\begin{lstlisting}[language=SQL]
-SELECT ST_Buffer(ST_Transform(linestring, 2154), 200) FROM ways
-WHERE ST_XMin(bbox) > 5.7 AND ST_XMax(bbox) < 5.8
-AND ST_YMin(bbox) > 45.1 AND ST_YMax(bbox) < 45.2
-AND (tags->'aeroway' = 'areodrome'
-	OR tags->'highway' = 'motorway' OR tags->'railway' = 'rail'
-);
-\end{lstlisting}
-
-Cette requête nous donne toutes les voies de type aéroport, chemin de fer ou autoroute de Grenoble. Ces géométries sont ensuite converties en Polygones par l'application Java.
-
 \subsection*{Tests}
 
 Nous avons comparé les résultats de l'affichage avec la carte de Grenoble sur le site web de openstreetmap pour vérifier la correspondance. Nous avons également confirmer le résultat sur la somme de la taille des routes de Grenoble sur Internet car la valeur ne nous semblait pas évidente.
