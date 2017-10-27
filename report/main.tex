@@ -501,7 +501,7 @@ y0 = ymin
 On peut alors générer le quadrillage :
 
 \begin{lstlisting}[language=SQL]
-SELECT * FROM ST_CreateFishnet(21, 36, 0.2, 0.2, 0.6986247, 43.3160588);
+SELECT * FROM ST_CreateFishnet(36, 21, 0.2, 0.2, 0.6986247, 43.3160588);
 \end{lstlisting}
 
 \begin{lstlisting}
@@ -518,6 +518,44 @@ pour chaque zone, qu'à faire l'intersection avec chaque bâtiment et regarder s
 elle est nulle ou non. Contrairement à la question 7 où on testait l'inclusion,
 on s'intéresse ici à l'intersection, sinon un bâtiment chevauchant plusieurs
 zones ne compterait pour aucune.
+
+Seulement, le calcul d'intersection pour toutes les zones et tous les bâtiments
+est extrêmement cher donc on considérera qu'un bâtiment appartient à une
+zone si son centroïde y est inclus.
+
+Par exemple, en prenant uniquement quatre zones :
+
+\begin{lstlisting}[language=SQL]
+SELECT grid.geom, COUNT(ways)
+FROM ST_CreateFishnet(2, 2, 3.6, 2.1, 0.6986247, 43.3160588) as grid, ways
+WHERE ST_Contains(ST_SetSRID(grid.geom, 4326), ST_Centroid(ways.linestring))
+GROUP BY grid.geom;
+\end{lstlisting}
+
+\begin{lstlisting}
+geom                                                                                            |  count  
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------
+01030000000100000005000000A1B0D52F225BE63F77CE609D74A84540A1B0D52F225BE63F449B2D6A41B546407B1C61ACCA311140449B2D6A41B546407B1C61ACCA31114077CE609D74A84540A1B0D52F225BE63F77CE609D74A84540 |   51262
+01030000000100000005000000A1B0D52F225BE63F449B2D6A41B54640A1B0D52F225BE63F1168FA360EC247407B1C61ACCA3111401168FA360EC247407B1C61ACCA311140449B2D6A41B54640A1B0D52F225BE63F449B2D6A41B54640 |  146166
+010300000001000000050000007B1C61ACCA31114077CE609D74A845407B1C61ACCA311140449B2D6A41B54640E282C71231981F40449B2D6A41B54640E282C71231981F4077CE609D74A845407B1C61ACCA31114077CE609D74A84540 | 1192611
+010300000001000000050000007B1C61ACCA311140449B2D6A41B546407B1C61ACCA3111401168FA360EC24740E282C71231981F401168FA360EC24740E282C71231981F40449B2D6A41B546407B1C61ACCA311140449B2D6A41B54640 | 2622439
+(4 rows)
+\end{lstlisting}
+
+On vérifie :
+
+\begin{lstlisting}[language=SQL]
+SELECT COUNT(ways) FROM ways;
+\end{lstlisting}
+
+\begin{lstlisting}
+count  
+---------
+4012478
+\end{lstlisting}
+
+Or $51262 + 146166 + 1192611 + 2622439 - 4012478 = 0$. Tous les bâtiments ont
+bien été associés à une zone.
 
 \subsubsection*{14.d}
 
