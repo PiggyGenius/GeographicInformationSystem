@@ -6,10 +6,13 @@ all: Main_comp
 run: Main
 
 Question10_comp:
+	mkdir -p bin
 	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/tests/Question10.java
 Question11_comp:
+	mkdir -p bin
 	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/tests/Question11.java
 Main_comp:
+	mkdir -p bin
 	javac -classpath $(COMP_CLASSPATH) -d bin/ src/java/Main.java
 
 Question10: Question10_comp
