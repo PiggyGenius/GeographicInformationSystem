@@ -545,10 +545,10 @@ Pour simplifier le quadrillage, on considère la région Rhône-Alpes comme rect
 On commence par récupérer ses coins :
 
 \begin{lstlisting}[language=SQL]
-SELECT MAX(ST_XMax(linestring)) as xmax,
-       MAX(ST_YMax(linestring)) as ymax,
-       MIN(ST_XMin(linestring)) as xmin,
-       MIN(ST_YMin(linestring)) as ymin
+SELECT MAX(ST_XMax(ST_Transform(linestring, 2154))) as xmax,
+       MAX(ST_YMax(ST_Transform(linestring, 2154))) as ymax,
+       MIN(ST_XMin(ST_Transform(linestring, 2154))) as xmin,
+       MIN(ST_YMin(ST_Transform(linestring, 2154))) as ymin
 FROM ways;
 \end{lstlisting}
 
@@ -603,7 +603,7 @@ GROUP BY grid.geom;
 
 \begin{lstlisting}
 st_astext                   |  count  
----------------------------|----------
+----------------------------|----------
 POLYGON((                   |   51262
     0.6986247 43.3160588,
     0.6986247 45.4160588,
@@ -649,6 +649,11 @@ count
 
 Or $51262 + 146166 + 1192611 + 2622439 - 4012478 = 0$. Tous les bâtiments ont
 bien été associés à une zone.
+
+Quand on combine avec l'affichage des routes et se restreint à Grenoble, on
+obtient :
+
+\includegraphics[height=23cm]{density_roads.png}
 
 \subsubsection*{Question bonus 14\_d}
 

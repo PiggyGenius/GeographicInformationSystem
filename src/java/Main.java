@@ -47,18 +47,17 @@ public class Main {
 
         if (plotDensities) {
             try {
-                grid = DataBase.getDensities(2, 2);
+                grid = DataBase.getDensities(2, 2); // Few subdivisions to make execution faster
             } catch(SQLException e) {
                 System.err.println("Error requesting the database: " + e.getMessage());
                 return;
             }
-        } else {
-            if (plotSchools) quartiers = DataBase.getQuartierSchool();
-            if (plotBuildings) buildingWays = DataBase.getBuildingWays();
-            if (plotRoads) roads = DataBase.getRoadWays();
-            if (plotNoisePollution) noisePollution = DataBase.getNoisePollutedZones();
-            if (plotStations) stations = DataBase.getTransportStations();
         }
+        if (plotSchools) quartiers = DataBase.getQuartierSchool();
+        if (plotBuildings) buildingWays = DataBase.getBuildingWays();
+        if (plotRoads) roads = DataBase.getRoadWays();
+        if (plotNoisePollution) noisePollution = DataBase.getNoisePollutedZones();
+        if (plotStations) stations = DataBase.getTransportStations();
 
         Utils.closeConnection();
 
@@ -67,9 +66,8 @@ public class Main {
 
 		Drawer drawer = new Drawer(map);
 		if (plotDensities) {
+			Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing densities...");
             drawer.drawDensities(grid);
-		    map.autoAdjust();
-            return;
         }
 		if (plotBuildings) {
 			Logger.getLogger(Main.class.getName()).log(Level.INFO, "Drawing buildings...");

@@ -201,17 +201,42 @@ public final class DataBase {
         double ySize = dy / nrows;
         Map<Polygon, Long> areas = new HashMap<>();
 
-        // /!\ SQL injections
         String query = (
-            "SELECT grid.geom, COUNT(ways) " +
+            "CREATE OR REPLACE FUNCTION ST_CreateFishnet(" +
+            "nrow integer, ncol integer," +
+            "xsize float8, ysize float8,"+
+            "x0 float8 DEFAULT 0, y0 float8 DEFAULT 0,"+
+            "OUT \"row\" integer, OUT col integer,"+
+            "OUT geom geometry)"+
+            "RETURNS SETOF record AS\n"+
+            "$$"+
+            "SELECT i + 1 AS row, j + 1 AS col, ST_Translate(cell, j * $3 + $5, i * $4 + $6) AS geom"+
+            "FROM generate_series(0, $1 - 1) AS i,"+
+            "generate_series(0, $2 - 1) AS j,"+
+            "("+
+            "SELECT ('POLYGON((0 0, 0 '||$4||', '||$3||' '||$4||', '||$3||' 0,0 0))')::geometry AS cell"+
+            ") AS foo;"+
+            "$$ LANGUAGE sql IMMUTABLE STRICT;"
+        );
+        Statement statement = connection.createStatement();
+        ResultSet rs = null;
+        
+        try {
+            statement.executeQuery(query);
+        } catch(SQLException e) {
+        }
+
+        // /!\ SQL injections
+        query = (
+            "SELECT ST_Transform(ST_SetSRID(grid.geom, 4326), 2154) , COUNT(ways) " +
             "FROM ST_CreateFishnet(" +
             nrows + ", " + ncols + ", " + xSize + ", " + ySize + ", " + corners.xMin + ", " + corners.yMin +
             ") as grid, ways " +
             "WHERE ST_Contains(ST_SetSRID(grid.geom, " + WAYS_LINESTRING_SRID + "), ST_Centroid(ways.linestring)) " +
             "GROUP BY grid.geom;"
         );
-        Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery(query);
+        statement = connection.createStatement();
+        rs = statement.executeQuery(query);
 
         while (rs.next()) { // There is one row
 		    org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);

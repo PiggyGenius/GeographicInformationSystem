@@ -58,6 +58,7 @@ public class Drawer{
 	}
 
     private static Color getDensityColor(Long density, Long maxDensity) {
+        // The color gives information about relative density
         double alpha = (double)density / maxDensity;
 
         return new Color((float)0, (float)0, (float)1, (float)alpha);
@@ -73,6 +74,5 @@ public class Drawer{
             poly.setFillColor(getDensityColor(entry.getValue(), maxDensity));
             map.addPrimitive(poly);
         }
-        map.autoAdjust();
     }
 }
