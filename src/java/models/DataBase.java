@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.Map;
+import java.util.HashMap;
+import models.Corners;
 
 import geoexplorer.gui.Polygon;
 import geoexplorer.gui.Point;
@@ -21,6 +24,7 @@ public final class DataBase {
 			+ "AND ST_XMax(bbox) < 5.8 "
 			+ "AND ST_YMin(bbox) > 45.1 "
 			+ "AND ST_YMax(bbox) < 45.2 ";
+    private static String WAYS_LINESTRING_SRID = "4326";
 
 	private static Connection connection;
 
@@ -167,7 +171,65 @@ public final class DataBase {
 		return res;
 	}
 
+	/** Answer to question 14c */
+    public static Corners getCorners() throws SQLException {
+        Corners c = new Corners();
+        String query = "SELECT MAX(ST_XMax(linestring)) as xmax, " +
+                       "MAX(ST_YMax(linestring)) as ymax, "+
+                       "MIN(ST_XMin(linestring)) as xmin, " +
+                       "MIN(ST_YMin(linestring)) as ymin " +
+                       "FROM ways";
 
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(query);
+        double xMin = -1, xMax = -1, yMin = -1, yMax = -1;
+        while (rs.next()) { // There is one row
+            c.xMin = (double)rs.getObject(3);
+            c.xMax = (double)rs.getObject(1);
+            c.yMin = (double)rs.getObject(4);
+            c.yMax = (double)rs.getObject(2);
+        }
+
+        return c;
+    }
+
+	public static Map<Polygon, Long> getDensities(int nrows, int ncols) throws SQLException {
+        Corners corners = DataBase.getCorners();
+        double dx = corners.xMax - corners.xMin;
+        double dy = corners.yMax - corners.yMin;
+        double xSize = dx / ncols;
+        double ySize = dy / nrows;
+        Map<Polygon, Long> areas = new HashMap<>();
+
+        // /!\ SQL injections
+        String query = (
+            "SELECT grid.geom, COUNT(ways) " +
+            "FROM ST_CreateFishnet(" +
+            nrows + ", " + ncols + ", " + xSize + ", " + ySize + ", " + corners.xMin + ", " + corners.yMin +
+            ") as grid, ways " +
+            "WHERE ST_Contains(ST_SetSRID(grid.geom, " + WAYS_LINESTRING_SRID + "), ST_Centroid(ways.linestring)) " +
+            "GROUP BY grid.geom;"
+        );
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(query);
+
+        while (rs.next()) { // There is one row
+		    org.postgis.PGgeometry geom = (org.postgis.PGgeometry)rs.getObject(1);
+            org.postgis.Polygon poly = (org.postgis.Polygon)geom.getGeometry();
+            areas.put(toPolygon(poly), (Long)rs.getObject(2));
+        }
+
+        return areas;
+    }
+    
+    private static Polygon toPolygon(org.postgis.Polygon poly) {
+		Polygon polygon = new Polygon();
+		for (int i = 0; i < poly.numPoints(); i++) {
+		    org.postgis.Point p = poly.getPoint(i);
+			polygon.addPoint(new Point(p.getX(), p.getY()));
+		}
+		return polygon;
+	}
 
 	private static Polygon toPolygon(org.postgis.PointComposedGeom geom) {
 		Polygon polygon = new Polygon();

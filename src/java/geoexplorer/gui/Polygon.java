@@ -82,4 +82,9 @@ public class Polygon implements GraphicalPrimitive {
 	public String toString() {
 		return this.ls.toString();
 	}
+
+    // Added by Vincent
+    public void setFillColor(Color c) {
+         fillColor = c;
+    }
 }
