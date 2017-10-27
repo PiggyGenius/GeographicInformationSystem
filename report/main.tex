@@ -398,17 +398,27 @@ et retourne la ville ayant la plus petite :
 \end{lstlisting}
 
 \vspace{1cm}
-% \section*{Question 9 (incomplet)}
+\section*{Question 9 (incomplet)}
 
-% Par "endroit", on comprendra "point géographique". La requête renverra, s'il
-% existe, un \verb?Point? PostGIS éloigné d'au moins 10 kilomètres de tout bâtiment.
+Par "endroit", on comprendra deux choses :
 
-% Commençons par récupérer les bâtiments :
+\begin{itemize}
+	\item Le centroïde d'un bâtiment ;
+	\item Un point géographique n'appartenant pas à un bâtiment.
+\end{itemize}
 
-% \begin{lstlisting}[language=SQL]
-% SELECT * FROM ways
-% WHERE tags->'building' = 'yes';
-% \end{lstlisting}
+Dans le premier cas, notre lieu de vacances est un bâtiment éloigné d'au moins
+10 kilomètres de tout autre bâtiment. Pour les trouver, on peut simplement
+calculer les distances deux à deux entre les centroïdes des bâtiments.
+
+Dans le deuxième cas, notre lieu de vacances n'est pas un bâtiment. Être éloigné
+de 10 kilomètres de toute autre structure signifie alors que ces bâtiments sont
+eux-mêmes éloignés d'au moins 2*10 kilomètres.
+
+\begin{lstlisting}
+   > 10km        > 10km
+B -------- * ------------- B
+\end{lstlisting}
 
 \vspace{1cm}
 \section*{Documentation de l'implémentation Java}
