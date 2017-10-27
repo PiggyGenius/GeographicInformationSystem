@@ -428,7 +428,17 @@ B -------- * ------------- B
 Un Makefile permet d'utiliser le projet. 
 \begin{itemize}
 	\item \verb?make? : compile le projet
-    \item \verb?make run? : compile et lance le projet
+    \item \verb?make run? : compile et lance le projet. Par défaut, tout est tracé. On peut en revanche ne tracer que certains éléments en les ajoutant à la suite de \verb?make run? :
+		\begin{itemize}
+				\item \verb?buildings? : affiche les immeubles
+				\item \verb?roads? : affiche les routes
+				\item \verb?noise? : affiche les zones de pollution sonore
+				\item \verb?stations? : affiche les stations de transport
+				\item \verb?schools? : affiche le nombre d'écoles par quartier
+				\item \verb?densities? : affiche la densité
+		\end{itemize}
+		Par exemple : \verb?make run buildings roads stations?.
+
     \item \verb?make Question10? : compile et lance le code de la question 10 (test de l'accès à la base de données)
     \item \verb?make Question11? : compile et lance le code de la question 11 (points dont le nom ressemble à "Dom\_\_ne \_niversit\%"
 \end{itemize}
@@ -493,13 +503,13 @@ Cette requête nous donne tous les routes dans Grenoble avec la projection Lambe
 \subsubsection*{Question bonus 13}
 
 \begin{lstlisting}[language=SQL]
-SELECT ST_Transform(linestring, 2154) FROM ways
-WHERE ST_XMin(bbox) > 5.7 AND ST_XMax(bbox) < 5.8
-AND ST_YMin(bbox) > 45.1 AND ST_YMax(bbox) < 45.2
-AND tags->'boundary' = 'administrative';
+SELECT ST_Transform(geom, 2154) FROM nodes
+WHERE ST_X(geom) BETWEEN 5.7 AND 5.8
+AND ST_Y(geom) BETWEEN 45.1 AND 45.2
+AND tags?'public_transport';
 \end{lstlisting}
 
-Cette requête nous donne tous les contours des quartiers de Grenoble. Ces géométries sont ensuite converties en Linestring par l'application Java.
+Cette requête nous donne tous les arrêts de transport public de Grenoble. Ces géométries sont ensuite converties en Point par l'application Java.
 
 \subsubsection*{Question bonus 14\_a}
 
